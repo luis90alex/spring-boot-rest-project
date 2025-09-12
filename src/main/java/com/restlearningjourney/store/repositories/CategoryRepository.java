@@ -1,6 +1,6 @@
-package com.codewithmosh.store.repositories;
+package com.restlearningjourney.store.repositories;
 
-import com.codewithmosh.store.entities.Category;
+import com.restlearningjourney.store.entities.Category;
 import org.springframework.data.repository.CrudRepository;
 
 public interface CategoryRepository extends CrudRepository<Category, Byte> {
