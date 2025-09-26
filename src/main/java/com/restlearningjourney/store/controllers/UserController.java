@@ -4,18 +4,17 @@ import com.restlearningjourney.store.dtos.ChangePasswordRequest;
 import com.restlearningjourney.store.dtos.RegisterUserRequest;
 import com.restlearningjourney.store.dtos.UpdateUserRequest;
 import com.restlearningjourney.store.dtos.UserDto;
-import com.restlearningjourney.store.entities.User;
 import com.restlearningjourney.store.mappers.UserMapper;
 import com.restlearningjourney.store.repositories.UserRepository;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 @RestController
@@ -55,9 +54,14 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<UserDto> createUser(
-            @RequestBody RegisterUserRequest request,
+    public ResponseEntity<?> registerUser(
+            @Valid @RequestBody RegisterUserRequest request,
             UriComponentsBuilder uriBuilder){
+        if (userRepository.existsByEmail(request.getEmail())){
+            return ResponseEntity.badRequest().body(
+                    Map.of("email", "Email is already registered")
+            );
+        }
         var user = userMapper.toEntity(request);
         userRepository.save(user);
 
