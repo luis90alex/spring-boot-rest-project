@@ -4,12 +4,12 @@ package com.restlearningjourney.store.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
-@Builder
+import java.math.BigDecimal;
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
-@ToString
 @Entity
 @Table(name = "cart_items")
 public class CartItem {
@@ -18,19 +18,28 @@ public class CartItem {
     @Column(name = "id")
     private Long id;
 
-    @Builder.Default
     @Column(name = "quantity")
-    private Integer quantity = 1;
+    private Integer quantity;
 
-    @ManyToOne (fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "cart_id")
-    @ToString.Exclude
     private Cart cart;
 
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "product_id")
-    @ToString.Exclude
     private Product product;
 
+    @Override
+    public String toString() {
+        return "CartItem{" +
+                "id=" + id +
+                ", product=" + product +
+                ", quantity=" + quantity +
+                '}';
+    }
+
+    public BigDecimal getTotalPrice() {
+        return product.getPrice().multiply(BigDecimal.valueOf(quantity));
+    }
 }

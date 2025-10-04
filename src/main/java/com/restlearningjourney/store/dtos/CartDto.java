@@ -10,15 +10,12 @@ import lombok.Getter;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Data
-@Builder
 public class CartDto {
 
-    private String id; //UUID as text
-
-    @Builder.Default
+    private UUID id;
     private List<CartItemDto> items = new ArrayList<>();
-
-    private BigDecimal totalPrice;
+    private BigDecimal totalPrice = BigDecimal.ZERO;
 }
