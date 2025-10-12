@@ -1,5 +1,6 @@
 package com.restlearningjourney.store.controllers;
 
+import com.restlearningjourney.store.config.JwtConfig;
 import com.restlearningjourney.store.dtos.JwtResponse;
 import com.restlearningjourney.store.dtos.LoginRequest;
 import com.restlearningjourney.store.dtos.UserDto;
@@ -7,6 +8,8 @@ import com.restlearningjourney.store.entities.User;
 import com.restlearningjourney.store.mappers.UserMapper;
 import com.restlearningjourney.store.repositories.UserRepository;
 import com.restlearningjourney.store.services.JwtService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -16,7 +19,6 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,11 +31,13 @@ public class AuthController {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
+    private final JwtConfig jwtConfig;
     private final UserMapper userMapper;
 
     @PostMapping("/login")
     public ResponseEntity<JwtResponse> login(
-            @RequestBody @Valid LoginRequest request){
+            @RequestBody @Valid LoginRequest request,
+            HttpServletResponse response) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getEmail(),
@@ -41,17 +45,37 @@ public class AuthController {
                 )
         );
         User user = userRepository.findByEmail(request.getEmail()).orElseThrow();
-        var token = jwtService.generateJwtToken(user);
-        System.out.println(token);
-        return ResponseEntity.ok(new JwtResponse(token));
+        String accessToken = jwtService.generateAccessToken(user);
+        String refreshToken = jwtService.generateRefreshToken(user);
+
+        Cookie cookie = new Cookie("refreshToken", refreshToken);
+        cookie.setHttpOnly(true);//not accessed by javascript
+        cookie.setPath("/auth/refresh");
+        cookie.setMaxAge(jwtConfig.getRefreshTokenExpiration());// 7d
+        cookie.setSecure(true);//only accessible from https
+
+
+        System.out.println(accessToken);
+        System.out.println(refreshToken);
+        System.out.println(cookie);
+
+        response.addCookie(cookie);
+        return ResponseEntity.ok(new JwtResponse(accessToken));
     }
 
-    @PostMapping("/validate")
-    public boolean validate(@RequestHeader("Authorization") String authHeader){
-        System.out.println("Validate called");
-        var token = authHeader.replace("Bearer ", "");
-        return jwtService.validateToken(token);
+    @PostMapping("/refresh")
+    public ResponseEntity<JwtResponse> refresh(
+            @CookieValue(value ="refreshToken") String refreshToken){
+        if(!jwtService.validateToken(refreshToken)){
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        Long userId = jwtService.getUserIdFromToken(refreshToken);
+        User user = userRepository.findById(userId).orElseThrow();
+        String accessToken = jwtService.generateAccessToken(user);
+
+        return ResponseEntity.ok(new JwtResponse(accessToken));
     }
+
 
     @GetMapping("/me")
     public ResponseEntity<UserDto> me(){

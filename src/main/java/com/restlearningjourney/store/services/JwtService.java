@@ -1,28 +1,36 @@
 package com.restlearningjourney.store.services;
 
+import com.restlearningjourney.store.config.JwtConfig;
 import com.restlearningjourney.store.entities.User;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
 
 @Service
+@AllArgsConstructor
 public class JwtService {
 
-    @Value("${spring.jwt.secret}")
-    private String secret;
-    public String generateJwtToken(User user) {
+    private final JwtConfig jwtConfig;
 
-        final long tokenExpiration = 86400; // 1 day
+    public String generateAccessToken(User user) {
+        return generateToken(user, jwtConfig.getAccessTokenExpiration());
+    }
+
+    public String generateRefreshToken(User user) {
+        return generateToken(user, jwtConfig.getRefreshTokenExpiration());
+    }
+
+    private String generateToken(User user, long tokenExpiration) {
         return Jwts.builder()
                 .subject(user.getId().toString())  //sub property of jwt
                 .issuedAt(new Date())
                 .claim("name", user.getName())
                 .claim("email", user.getEmail())
-                .expiration(new Date(System.currentTimeMillis() + tokenExpiration*1000))
-                .signWith(Keys.hmacShaKeyFor(secret.getBytes()))
+                .expiration(new Date(System.currentTimeMillis() + tokenExpiration * 1000))
+                .signWith(jwtConfig.getSecretKey())
                 .compact();
     }
 
@@ -37,7 +45,7 @@ public class JwtService {
 
     private Claims getClaims(String token) {
         return Jwts.parser()
-                .verifyWith(Keys.hmacShaKeyFor(secret.getBytes()))
+                .verifyWith(jwtConfig.getSecretKey())
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
