@@ -8,6 +8,7 @@ import com.restlearningjourney.store.entities.User;
 import com.restlearningjourney.store.mappers.UserMapper;
 import com.restlearningjourney.store.repositories.UserRepository;
 import com.restlearningjourney.store.services.JwtService;
+import com.restlearningjourney.store.utils.Jwt;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -44,9 +45,8 @@ public class AuthController {
                         request.getPassword()
                 )
         );
-        User user = userRepository.findByEmail(request.getEmail()).orElseThrow();
-        String accessToken = jwtService.generateAccessToken(user);
-        String refreshToken = jwtService.generateRefreshToken(user);
+        String accessToken = jwtService.generateAccessToken();
+        String refreshToken = jwtService.generateRefreshToken();
 
         Cookie cookie = new Cookie("refreshToken", refreshToken);
         cookie.setHttpOnly(true);//not accessed by javascript
@@ -66,12 +66,14 @@ public class AuthController {
     @PostMapping("/refresh")
     public ResponseEntity<JwtResponse> refresh(
             @CookieValue(value ="refreshToken") String refreshToken){
-        if(!jwtService.validateToken(refreshToken)){
+
+        Jwt jwt =  jwtService.parse(refreshToken);
+        if(jwt.isValid()){
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
-        Long userId = jwtService.getUserIdFromToken(refreshToken);
+        Long userId = jwt.getUserId();
         User user = userRepository.findById(userId).orElseThrow();
-        String accessToken = jwtService.generateAccessToken(user);
+        String accessToken = jwtService.generateAccessToken();
 
         return ResponseEntity.ok(new JwtResponse(accessToken));
     }

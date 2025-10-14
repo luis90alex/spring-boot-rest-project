@@ -4,6 +4,7 @@ import com.restlearningjourney.store.dtos.ChangePasswordRequest;
 import com.restlearningjourney.store.dtos.RegisterUserRequest;
 import com.restlearningjourney.store.dtos.UpdateUserRequest;
 import com.restlearningjourney.store.dtos.UserDto;
+import com.restlearningjourney.store.entities.Role;
 import com.restlearningjourney.store.mappers.UserMapper;
 import com.restlearningjourney.store.repositories.UserRepository;
 import jakarta.validation.Valid;
@@ -66,6 +67,7 @@ public class UserController {
         }
         var user = userMapper.toEntity(request);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setRole(Role.USER);
         userRepository.save(user);
 
         var userDto = userMapper.toDto(user);

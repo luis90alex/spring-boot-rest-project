@@ -1,18 +1,24 @@
 package com.restlearningjourney.store.filters;
 
+import com.restlearningjourney.store.entities.Role;
 import com.restlearningjourney.store.services.JwtService;
+import com.restlearningjourney.store.utils.Jwt;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
+
 @Component
 @AllArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -29,15 +35,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
         String token = authHeader.replace("Bearer ", "");
 
-        if(!jwtService.validateToken(token)){
+        Jwt jwt = jwtService.parse(token);
+
+        if(!jwt.isValid()){
             System.out.println("Invalid token");
             filterChain.doFilter(request, response);
             return;
         }
+        Role role = jwt.getRole();
+        Long userId = jwt.getUserId();
         UsernamePasswordAuthenticationToken authentication = new  UsernamePasswordAuthenticationToken(
-                jwtService.getUserIdFromToken(token),
+                userId,
                 null,
-                null);
+                List.of(new SimpleGrantedAuthority("ROLE_" + role)));
 
         authentication.setDetails(
                 new WebAuthenticationDetailsSource().buildDetails(request)
