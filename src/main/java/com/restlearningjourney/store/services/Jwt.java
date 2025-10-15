@@ -1,9 +1,8 @@
-package com.restlearningjourney.store.utils;
+package com.restlearningjourney.store.services;
 
 import com.restlearningjourney.store.entities.Role;
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtException;
-import org.springframework.stereotype.Component;
+import io.jsonwebtoken.Jwts;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
@@ -26,13 +25,8 @@ public class Jwt {
         return secretKey;
     }
 
-    public boolean isValid() {
-        try {
-            return claims.getExpiration().after(new Date());
-        }catch (JwtException e){
-            System.out.println("Invalid token");
-            return false;
-        }
+    public boolean isExpired() {
+        return claims.getExpiration().before(new Date());
     }
 
     public Long getUserId() {
@@ -43,11 +37,11 @@ public class Jwt {
         return Role.valueOf(claims.get("role", String.class));
     }
 
+    //Jwt with claims and signed
     @Override
     public String toString() {
-        return "Jwt{" +
-                "claims=" + claims +
-                ", secretKey=" + secretKey +
-                '}';
+        return Jwts.builder().claims(claims)
+                .signWith(secretKey)
+                .compact();
     }
 }

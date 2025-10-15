@@ -2,14 +2,13 @@ package com.restlearningjourney.store.filters;
 
 import com.restlearningjourney.store.entities.Role;
 import com.restlearningjourney.store.services.JwtService;
-import com.restlearningjourney.store.utils.Jwt;
+import com.restlearningjourney.store.services.Jwt;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -37,17 +36,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         Jwt jwt = jwtService.parse(token);
 
-        if(!jwt.isValid()){
-            System.out.println("Invalid token");
+        if(jwt == null || jwt.isExpired()){
+            System.out.println("doFilterInternal - Invalid token ");
             filterChain.doFilter(request, response);
             return;
         }
-        Role role = jwt.getRole();
-        Long userId = jwt.getUserId();
         UsernamePasswordAuthenticationToken authentication = new  UsernamePasswordAuthenticationToken(
-                userId,
+                jwt.getUserId(),
                 null,
-                List.of(new SimpleGrantedAuthority("ROLE_" + role)));
+                List.of(new SimpleGrantedAuthority("ROLE_" + jwt.getRole())));
 
         authentication.setDetails(
                 new WebAuthenticationDetailsSource().buildDetails(request)

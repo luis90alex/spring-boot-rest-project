@@ -1,16 +1,14 @@
 package com.restlearningjourney.store.services;
 
 import com.restlearningjourney.store.config.JwtConfig;
-import com.restlearningjourney.store.entities.Role;
 import com.restlearningjourney.store.entities.User;
 import com.restlearningjourney.store.repositories.UserRepository;
 import io.jsonwebtoken.*;
 import lombok.AllArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import com.restlearningjourney.store.utils.Jwt;
+
 import java.util.Date;
 
 @Service
@@ -20,31 +18,33 @@ public class JwtService {
     private final JwtConfig jwtConfig;
     private final UserRepository userRepository;
 
-    public String generateAccessToken() {
-        User user = getUser();
+    public Jwt generateAccessToken(User user) {
         return generateToken(user, jwtConfig.getAccessTokenExpiration());
     }
 
-    public String generateRefreshToken() {
-        User user = getUser();
+    public Jwt generateRefreshToken(User user) {
         return generateToken(user, jwtConfig.getRefreshTokenExpiration());
     }
 
-    private String generateToken(User user, long tokenExpiration) {
-        return Jwts.builder()
-                .subject(user.getId().toString())  //sub property of jwt
+    private Jwt generateToken(User user, long tokenExpiration) {
+        Claims claims = Jwts.claims()
+                .subject(user.getId().toString())
+                .add("email",  user.getEmail())
+                .add("name",  user.getName())
+                .add("role",  user.getRole())
                 .issuedAt(new Date())
-                .claim("name", user.getName())
-                .claim("email", user.getEmail())
-                .claim("role", user.getRole())
                 .expiration(new Date(System.currentTimeMillis() + tokenExpiration * 1000))
-                .signWith(jwtConfig.getSecretKey())
-                .compact();
+                .build();
+        return new Jwt(claims, jwtConfig.getSecretKey());
     }
 
     public Jwt parse(String token){
-        Claims claims =getClaims(token);
-        return new Jwt(getClaims(token), jwtConfig.getSecretKey());
+        try {
+            Claims claims =getClaims(token);
+            return new Jwt(getClaims(token), jwtConfig.getSecretKey());
+        }catch (Exception e){
+            return null;
+        }
     }
 
     private Claims getClaims(String token) {
@@ -53,13 +53,6 @@ public class JwtService {
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
-    }
-
-    private User getUser(){
-        Authentication authentication =  SecurityContextHolder.getContext().getAuthentication();
-        Long userId = (Long) authentication.getPrincipal();
-        System.out.println("userId = " + userId);
-        return userRepository.findById(userId).orElseThrow();
     }
 
 }

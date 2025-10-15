@@ -8,7 +8,7 @@ import com.restlearningjourney.store.entities.User;
 import com.restlearningjourney.store.mappers.UserMapper;
 import com.restlearningjourney.store.repositories.UserRepository;
 import com.restlearningjourney.store.services.JwtService;
-import com.restlearningjourney.store.utils.Jwt;
+import com.restlearningjourney.store.services.Jwt;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -45,10 +45,11 @@ public class AuthController {
                         request.getPassword()
                 )
         );
-        String accessToken = jwtService.generateAccessToken();
-        String refreshToken = jwtService.generateRefreshToken();
+        User user = userRepository.findByEmail(request.getEmail()).orElseThrow();
+        Jwt accessToken = jwtService.generateAccessToken(user);
+        Jwt refreshToken = jwtService.generateRefreshToken(user);
 
-        Cookie cookie = new Cookie("refreshToken", refreshToken);
+        Cookie cookie = new Cookie("refreshToken", refreshToken.toString());
         cookie.setHttpOnly(true);//not accessed by javascript
         cookie.setPath("/auth/refresh");
         cookie.setMaxAge(jwtConfig.getRefreshTokenExpiration());// 7d
@@ -60,7 +61,7 @@ public class AuthController {
         System.out.println(cookie);
 
         response.addCookie(cookie);
-        return ResponseEntity.ok(new JwtResponse(accessToken));
+        return ResponseEntity.ok(new JwtResponse(accessToken.toString()));
     }
 
     @PostMapping("/refresh")
@@ -68,14 +69,13 @@ public class AuthController {
             @CookieValue(value ="refreshToken") String refreshToken){
 
         Jwt jwt =  jwtService.parse(refreshToken);
-        if(jwt.isValid()){
+        if(jwt.isExpired()){
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
-        Long userId = jwt.getUserId();
-        User user = userRepository.findById(userId).orElseThrow();
-        String accessToken = jwtService.generateAccessToken();
+        User user = userRepository.findById(jwt.getUserId()).orElseThrow();
+        Jwt accessToken = jwtService.generateAccessToken(user);
 
-        return ResponseEntity.ok(new JwtResponse(accessToken));
+        return ResponseEntity.ok(new JwtResponse(accessToken.toString()));
     }
 
 
