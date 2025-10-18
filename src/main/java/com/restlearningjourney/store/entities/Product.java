@@ -38,6 +38,10 @@ public class Product {
     @Builder.Default
     private List<CartItem> cartItems = new ArrayList<>();
 
+    @OneToOne(mappedBy = "product")
+    private OrderItem orderItem;
+
+
     @Override
     public String toString() {
         return "Product{" +

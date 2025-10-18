@@ -2,11 +2,8 @@ package com.restlearningjourney.store.services;
 
 import com.restlearningjourney.store.config.JwtConfig;
 import com.restlearningjourney.store.entities.User;
-import com.restlearningjourney.store.repositories.UserRepository;
 import io.jsonwebtoken.*;
 import lombok.AllArgsConstructor;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -16,7 +13,6 @@ import java.util.Date;
 public class JwtService {
 
     private final JwtConfig jwtConfig;
-    private final UserRepository userRepository;
 
     public Jwt generateAccessToken(User user) {
         return generateToken(user, jwtConfig.getAccessTokenExpiration());

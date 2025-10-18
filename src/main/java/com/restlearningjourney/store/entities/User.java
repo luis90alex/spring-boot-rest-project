@@ -59,6 +59,11 @@ public class User {
     )
     private Set<Product> favoriteProducts = new HashSet<>();
 
+    @OneToMany(mappedBy = "customer",  cascade = {CascadeType.PERSIST, CascadeType.REMOVE},
+            orphanRemoval = true)
+    @Builder.Default
+    private Set<Order> orders = new HashSet<>();
+
     public void addFavoriteProduct(Product product) {
         favoriteProducts.add(product);
     }
