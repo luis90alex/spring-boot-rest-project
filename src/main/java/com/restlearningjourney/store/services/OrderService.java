@@ -1,39 +1,39 @@
 package com.restlearningjourney.store.services;
 
 
-import com.restlearningjourney.store.dtos.CartDto;
 import com.restlearningjourney.store.dtos.OrderDto;
+import com.restlearningjourney.store.dtos.RegisterOrderDto;
 import com.restlearningjourney.store.entities.*;
 import com.restlearningjourney.store.exceptions.CartNotFoundException;
+import com.restlearningjourney.store.exceptions.OrderNotFoundException;
 import com.restlearningjourney.store.mappers.OrderMapper;
 import com.restlearningjourney.store.repositories.CartRepository;
 import com.restlearningjourney.store.repositories.OrderRepository;
-import com.restlearningjourney.store.repositories.UserRepository;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Service
 public class OrderService {
 
     private final CartRepository cartRepository;
-    private final UserRepository userRepository;
     private final OrderRepository orderRepository;
     private final OrderMapper orderMapper;
+    private final UserService userService;
 
-    public OrderService(CartRepository cartRepository, UserRepository userRepository, OrderRepository orderRepository, OrderMapper orderMapper) {
+    public OrderService(CartRepository cartRepository, OrderRepository orderRepository, OrderMapper orderMapper, UserService userService) {
         this.cartRepository = cartRepository;
-        this.userRepository = userRepository;
         this.orderRepository = orderRepository;
         this.orderMapper = orderMapper;
+        this.userService = userService;
     }
 
-    public OrderDto createOrder(Cart cart) {
-        User user = getCurrentUser();
+    public RegisterOrderDto createOrder(Cart cart) {
+        User user = userService.getCurrentUser();
 
         Order order = new Order();
         order.setStatus(OrderStatus.PENDING);
@@ -47,17 +47,17 @@ public class OrderService {
            OrderItem orderItem = orderMapper.fromCartItemToOrderItem(item);
            orderItem.setOrder(order);
            System.out.println(orderItem);
-           order.getOrderItems().add(orderItem);
+           order.getItems().add(orderItem);
         });
         orderRepository.save(order);
 
         System.out.println("Order created " + order);
-        OrderDto orderDto = new OrderDto();
-        orderDto.setId(order.getId());
+        RegisterOrderDto registerOrderDto = new RegisterOrderDto();
+        registerOrderDto.setId(order.getId());
 
-        return orderDto;
+        return registerOrderDto;
     }
-    public OrderDto checkout(UUID cartID) {
+    public RegisterOrderDto checkout(UUID cartID) {
 
         Cart cart = cartRepository.findById(cartID).orElse(null);
         if (cart == null) {
@@ -66,24 +66,41 @@ public class OrderService {
         if (cart.getItems().isEmpty()) {
             throw new CartNotFoundException();
         }
-        OrderDto orderDto = createOrder(cart);
+        RegisterOrderDto registerOrderDto = createOrder(cart);
 
         System.out.println("OrderController:checkout clearing cart");
         System.out.println("Before clearing " +  cart);
         cart.clear();
         cartRepository.save(cart);
         System.out.println("After clearing " +  cart);
-        return orderDto;
+        return registerOrderDto;
     }
 
-    public User getCurrentUser() {
-        Authentication authentication =  SecurityContextHolder.getContext().getAuthentication();
-        Long userId = (Long) authentication.getPrincipal();
 
-        User user = userRepository.findById(userId).orElse(null);
-        if (user == null) {
-            throw new BadCredentialsException("Invalid username or password");
+    public List<OrderDto> getAllOrders() {
+        System.out.println("OrderController:getAllOrders");
+        User user = userService.getCurrentUser();
+        List<Order> orders = orderRepository.findOrdersByCustomerId(user.getId());
+        System.out.println(orders.getFirst());
+        List<OrderDto> orderDtos = new ArrayList<>();
+        orders.forEach(order ->
+        {
+            OrderDto orderDto = orderMapper.fromOrderToDto(order);
+            System.out.println(orderDto);
+            orderDtos.add(orderDto);
+        });
+        return orderDtos;
+    }
+
+    public OrderDto getOrderById(Long id) {
+        Order  order = orderRepository.findById(id).orElse(null);
+        if(order == null) {
+            throw new OrderNotFoundException();
         }
-        return user;
+        User user = userService.getCurrentUser();
+        if (!order.getCustomer().getId().equals(user.getId())) {
+            throw new BadCredentialsException("Id does not belong to the current user");
+        }
+        return orderMapper.fromOrderToDto(order);
     }
 }

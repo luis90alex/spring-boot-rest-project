@@ -34,7 +34,7 @@ public class Order {
             cascade = {CascadeType.PERSIST, CascadeType.REMOVE},
             orphanRemoval = true,
             fetch = FetchType.LAZY)
-    private Set<OrderItem> orderItems = new HashSet<>();
+    private Set<OrderItem> items = new HashSet<>();
 
 
     public Order() {
@@ -88,12 +88,12 @@ public class Order {
         this.customer = customer;
     }
 
-    public Set<OrderItem> getOrderItems() {
-        return orderItems;
+    public Set<OrderItem> getItems() {
+        return items;
     }
 
-    public void setOrderItems(Set<OrderItem> orderItems) {
-        this.orderItems = orderItems;
+    public void setItems(Set<OrderItem> orderItems) {
+        this.items = orderItems;
     }
 
     @Override
@@ -104,7 +104,7 @@ public class Order {
                 ", createdAt=" + createdAt +
                 ", totalPrice=" + totalPrice +
                 ", customer=" + customer.getId() +
-                ", orderItems=" + orderItems +
+                ", orderItems=" + items +
                 '}';
     }
 }

@@ -1,19 +1,20 @@
 package com.restlearningjourney.store.dtos;
 
-import java.util.UUID;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class RegisterOrderDto {
-
-    private UUID cartId;
+    @JsonProperty("orderId")
+    private Long id;
 
     public RegisterOrderDto() {
     }
 
-    public UUID getCartId() {
-        return cartId;
+    public Long getId() {
+        return id;
     }
 
-    public void setCartId(UUID cartId) {
-        this.cartId = cartId;
+    public void setId(Long id) {
+        this.id = id;
     }
 }
