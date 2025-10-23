@@ -20,13 +20,13 @@ public class Order {
     @Enumerated(EnumType.STRING)//store it as string
     private OrderStatus status;
 
-    @Column(name = "created_at")
+    @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @Column(name = "total_price")
     private BigDecimal totalPrice;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "customer_id")
     private User customer;
 
@@ -96,6 +96,26 @@ public class Order {
         this.items = orderItems;
     }
 
+    public static Order fromCart(Cart cart, User customer){
+        Order order = new Order();
+        order.setCustomer(customer);
+        order.setStatus(OrderStatus.PENDING);
+        order.setTotalPrice(cart.getTotalPrice());
+
+        customer.getOrders().add(order);
+
+        cart.getItems().forEach(item -> {
+            OrderItem orderItem = new OrderItem(order, item.getProduct(), item.getQuantity());
+            System.out.println(orderItem);
+            order.items.add(orderItem);
+        });
+        return order;
+    }
+
+    public boolean isPlacedBy(User customer){
+        return this.customer.equals(customer);
+    }
+
     @Override
     public String toString() {
         return "Order{" +
@@ -103,7 +123,7 @@ public class Order {
                 ", status=" + status +
                 ", createdAt=" + createdAt +
                 ", totalPrice=" + totalPrice +
-                ", customer=" + customer.getId() +
+                //", customer=" + customer.getId() +
                 ", orderItems=" + items +
                 '}';
     }

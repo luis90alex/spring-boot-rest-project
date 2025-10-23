@@ -27,14 +27,4 @@ public class UserService implements UserDetailsService {
        );
     }
 
-    public com.restlearningjourney.store.entities.User getCurrentUser() {
-        Authentication authentication =  SecurityContextHolder.getContext().getAuthentication();
-        Long userId = (Long) authentication.getPrincipal();
-
-        com.restlearningjourney.store.entities.User user = userRepository.findById(userId).orElse(null);
-        if (user == null) {
-            throw new BadCredentialsException("Invalid username or password");
-        }
-        return user;
-    }
 }

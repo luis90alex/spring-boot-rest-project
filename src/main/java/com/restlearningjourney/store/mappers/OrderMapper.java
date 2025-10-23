@@ -1,8 +1,8 @@
 package com.restlearningjourney.store.mappers;
 
 
+import com.restlearningjourney.store.dtos.CheckoutResponse;
 import com.restlearningjourney.store.dtos.OrderDto;
-import com.restlearningjourney.store.dtos.RegisterOrderDto;
 import com.restlearningjourney.store.entities.CartItem;
 import com.restlearningjourney.store.entities.Order;
 import com.restlearningjourney.store.entities.OrderItem;
@@ -12,7 +12,7 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface OrderMapper {
 
-    RegisterOrderDto toDto(Order order);
+    CheckoutResponse toDto(Order order);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(source = "product", target = "product")

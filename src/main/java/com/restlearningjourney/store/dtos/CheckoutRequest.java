@@ -1,12 +1,15 @@
 package com.restlearningjourney.store.dtos;
 
+import jakarta.validation.constraints.NotNull;
+
 import java.util.UUID;
 
-public class RegisterOrderRequest {
+public class CheckoutRequest {
 
+    @NotNull(message = "CartId is required")
     private UUID cartId;
 
-    public RegisterOrderRequest() {
+    public CheckoutRequest() {
     }
 
     public UUID getCartId() {

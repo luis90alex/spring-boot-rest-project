@@ -3,11 +3,11 @@ package com.restlearningjourney.store.dtos;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class RegisterOrderDto {
+public class CheckoutResponse {
     @JsonProperty("orderId")
     private Long id;
 
-    public RegisterOrderDto() {
+    public CheckoutResponse() {
     }
 
     public Long getId() {

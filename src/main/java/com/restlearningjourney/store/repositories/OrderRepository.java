@@ -1,14 +1,20 @@
 package com.restlearningjourney.store.repositories;
 
 import com.restlearningjourney.store.entities.Order;
-import com.restlearningjourney.store.entities.Product;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
+    @EntityGraph(attributePaths = "items.product")
     @Query(value = "select o from Order o where o.customer.id = :customerId")
-    List<Order> findOrdersByCustomerId(@Param("customerId") Long customerId);
+    List<Order> getOrdersByCustomer(@Param("customerId") Long customerId);
+
+    @EntityGraph(attributePaths = "items.product")
+    @Query(value = "select o from Order o where o.id = :orderId")
+    Optional<Order> getOrderWithItems(@Param("orderId") Long orderId);
 }

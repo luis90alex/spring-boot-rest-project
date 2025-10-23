@@ -27,18 +27,19 @@ public class OrderItem {
     @JoinColumn(name = "order_id")
     private Order order;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
     private Product product;
 
     public OrderItem() {
     }
 
-    public OrderItem(Long id, BigDecimal unitPrice, BigDecimal totalPrice, Integer quantity) {
-        this.id = id;
-        this.unitPrice = unitPrice;
-        this.totalPrice = totalPrice;
+    public OrderItem(Order order, Product product, Integer quantity) {
+        this.order = order;
+        this.product = product;
         this.quantity = quantity;
+        this.unitPrice = product.getPrice();
+        this.totalPrice = unitPrice.multiply(BigDecimal.valueOf(quantity));
     }
 
     public Long getId() {
@@ -96,8 +97,8 @@ public class OrderItem {
                 ", unitPrice=" + unitPrice +
                 ", totalPrice=" + totalPrice +
                 ", quantity=" + quantity +
-                ", order=" + order.getId() +
-                ", product=" + product.getId() +
+                //", order=" + order.getId() +
+                //", product=" + product.getId() +
                 '}';
     }
 }

@@ -79,16 +79,16 @@ public class CartController {
     }
 
     @ExceptionHandler(CartNotFoundException.class)
-    public ResponseEntity<Map<String, String>> handleCarNotFound(){
+    public ResponseEntity<ErrorDto> handleCarNotFound(){
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                Map.of("error", "Cart not found")
+                new ErrorDto("Cart not found")
         );
     }
 
     @ExceptionHandler(ProductNotFoundException.class)
-    public ResponseEntity<Map<String, String>> handleProductNotFound(){
+    public ResponseEntity<ErrorDto> handleProductNotFound(){
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                Map.of("error", "Product not found in the cart")
+                new ErrorDto("Product not found")
         );
     }
 
