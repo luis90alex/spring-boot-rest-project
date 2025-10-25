@@ -16,3 +16,6 @@ spring:
       enabled: always
   main:
     banner-mode: console
+websiteUrl: http://localhost:4242
+stripe:
+  secretKey: ${STRIPE_SECRET_KEY}

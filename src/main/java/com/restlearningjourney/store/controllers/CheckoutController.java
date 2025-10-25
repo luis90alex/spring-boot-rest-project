@@ -6,8 +6,10 @@ import com.restlearningjourney.store.dtos.ErrorDto;
 import com.restlearningjourney.store.exceptions.CartEmptyException;
 import com.restlearningjourney.store.exceptions.CartNotFoundException;
 import com.restlearningjourney.store.exceptions.OrderNotFoundException;
+import com.restlearningjourney.store.exceptions.PaymentException;
 import com.restlearningjourney.store.services.CheckoutService;
 import com.restlearningjourney.store.services.OrderService;
+import com.stripe.exception.StripeException;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -46,5 +48,11 @@ public class CheckoutController {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                 new ErrorDto("Order not found")
         );
+    }
+
+    @ExceptionHandler(PaymentException.class)
+    public ResponseEntity<?> handlePaymentException(){
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ErrorDto("Error creating a checkout session"));
     }
 }

@@ -7,7 +7,6 @@ import com.restlearningjourney.store.exceptions.OrderNotFoundException;
 import com.restlearningjourney.store.mappers.OrderMapper;
 import com.restlearningjourney.store.repositories.OrderRepository;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
