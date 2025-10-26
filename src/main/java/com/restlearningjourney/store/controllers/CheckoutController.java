@@ -7,24 +7,23 @@ import com.restlearningjourney.store.exceptions.CartEmptyException;
 import com.restlearningjourney.store.exceptions.CartNotFoundException;
 import com.restlearningjourney.store.exceptions.OrderNotFoundException;
 import com.restlearningjourney.store.exceptions.PaymentException;
+import com.restlearningjourney.store.repositories.OrderRepository;
 import com.restlearningjourney.store.services.CheckoutService;
-import com.restlearningjourney.store.services.OrderService;
-import com.stripe.exception.StripeException;
+import com.restlearningjourney.store.services.WebhookRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/checkout")
 public class CheckoutController {
 
-    private final OrderService orderService;
     private final CheckoutService checkoutService;
 
-    public CheckoutController(OrderService orderService, CheckoutService checkoutService) {
-        this.orderService = orderService;
+    public CheckoutController(CheckoutService checkoutService) {
         this.checkoutService = checkoutService;
     }
 
@@ -34,6 +33,14 @@ public class CheckoutController {
         System.out.println("OrderController:checkout");
         System.out.println("CartId = " + request.getCartId());
         return checkoutService.checkout(request);
+    }
+
+    @PostMapping("/webhook")
+    public void handleWebHook(
+            @RequestHeader Map<String,String> headers,
+            @RequestBody String payload
+    ){
+        checkoutService.handleWebhookEvent(new WebhookRequest(headers, payload));
     }
 
     @ExceptionHandler({CartNotFoundException.class, CartEmptyException.class})

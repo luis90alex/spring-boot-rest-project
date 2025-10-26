@@ -1,7 +1,6 @@
 package com.restlearningjourney.store.dtos;
 
-import com.restlearningjourney.store.entities.OrderItem;
-import com.restlearningjourney.store.entities.OrderStatus;
+import com.restlearningjourney.store.entities.PaymentStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -11,7 +10,7 @@ import java.util.Set;
 public class OrderDto {
 
     private Long id;
-    private OrderStatus status;
+    private PaymentStatus status;
     private LocalDateTime createdAt;
     private BigDecimal totalPrice;
     private Set<OrderItemDto> items = new HashSet<>();
@@ -27,11 +26,11 @@ public class OrderDto {
         this.id = id;
     }
 
-    public OrderStatus getStatus() {
+    public PaymentStatus getStatus() {
         return status;
     }
 
-    public void setStatus(OrderStatus status) {
+    public void setStatus(PaymentStatus status) {
         this.status = status;
     }
 

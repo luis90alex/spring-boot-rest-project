@@ -18,7 +18,7 @@ public class Order {
 
     @Column(name = "status")
     @Enumerated(EnumType.STRING)//store it as string
-    private OrderStatus status;
+    private PaymentStatus status;
 
     @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -40,7 +40,7 @@ public class Order {
     public Order() {
     }
 
-    public Order(Long id, OrderStatus status, LocalDateTime createdAt, BigDecimal totalPrice, User customer) {
+    public Order(Long id, PaymentStatus status, LocalDateTime createdAt, BigDecimal totalPrice, User customer) {
         this.id = id;
         this.status = status;
         this.createdAt = createdAt;
@@ -56,11 +56,11 @@ public class Order {
         this.id = id;
     }
 
-    public OrderStatus getStatus() {
+    public PaymentStatus getStatus() {
         return status;
     }
 
-    public void setStatus(OrderStatus status) {
+    public void setStatus(PaymentStatus status) {
         this.status = status;
     }
 
@@ -99,7 +99,7 @@ public class Order {
     public static Order fromCart(Cart cart, User customer){
         Order order = new Order();
         order.setCustomer(customer);
-        order.setStatus(OrderStatus.PENDING);
+        order.setStatus(PaymentStatus.PENDING);
         order.setTotalPrice(cart.getTotalPrice());
 
         customer.getOrders().add(order);

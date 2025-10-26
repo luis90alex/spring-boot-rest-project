@@ -1,6 +1,6 @@
 package com.restlearningjourney.store.entities;
 
-public enum OrderStatus {
+public enum PaymentStatus {
     PENDING,
     PAID,
     FAILED,

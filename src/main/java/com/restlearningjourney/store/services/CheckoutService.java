@@ -9,14 +9,8 @@ import com.restlearningjourney.store.exceptions.CartNotFoundException;
 import com.restlearningjourney.store.exceptions.PaymentException;
 import com.restlearningjourney.store.repositories.CartRepository;
 import com.restlearningjourney.store.repositories.OrderRepository;
-import com.stripe.exception.StripeException;
-import com.stripe.model.checkout.Session;
-import com.stripe.param.checkout.SessionCreateParams;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.math.BigDecimal;
 
 @Service
 public class CheckoutService {
@@ -55,6 +49,7 @@ public class CheckoutService {
             checkoutResponse.setCheckoutUrl(session.getCheckoutUrl());
 
             cartService.clearCart(cart.getId());
+
             return checkoutResponse;
         }catch (PaymentException ex){
             System.out.println(ex.getMessage());
@@ -63,4 +58,14 @@ public class CheckoutService {
         }
     }
 
+
+    public void handleWebhookEvent(WebhookRequest request) {
+        paymentGateway
+                .parseWebhookRequest(request)
+                .ifPresent(paymentResult -> {
+                    Order order = orderRepository.findById(paymentResult.getOrderId()).orElseThrow();
+                    order.setStatus(paymentResult.getPaymentStatus());
+                    orderRepository.save(order);
+                });
+    }
 }
