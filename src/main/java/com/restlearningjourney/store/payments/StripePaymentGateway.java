@@ -1,9 +1,8 @@
 package com.restlearningjourney.store.payments;
 
-import com.restlearningjourney.store.entities.Order;
-import com.restlearningjourney.store.entities.OrderItem;
-import com.restlearningjourney.store.entities.PaymentStatus;
-import com.restlearningjourney.store.exceptions.PaymentException;
+import com.restlearningjourney.store.orders.Order;
+import com.restlearningjourney.store.orders.OrderItem;
+import com.restlearningjourney.store.orders.PaymentStatus;
 import com.stripe.exception.SignatureVerificationException;
 import com.stripe.exception.StripeException;
 import com.stripe.model.Event;

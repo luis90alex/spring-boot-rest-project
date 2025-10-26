@@ -1,16 +1,13 @@
 package com.restlearningjourney.store.payments;
 
-import com.restlearningjourney.store.dtos.CheckoutRequest;
-import com.restlearningjourney.store.dtos.CheckoutResponse;
-import com.restlearningjourney.store.entities.Cart;
-import com.restlearningjourney.store.entities.Order;
-import com.restlearningjourney.store.exceptions.CartEmptyException;
-import com.restlearningjourney.store.exceptions.CartNotFoundException;
-import com.restlearningjourney.store.exceptions.PaymentException;
-import com.restlearningjourney.store.repositories.CartRepository;
-import com.restlearningjourney.store.repositories.OrderRepository;
-import com.restlearningjourney.store.services.AuthService;
-import com.restlearningjourney.store.services.CartService;
+import com.restlearningjourney.store.carts.Cart;
+import com.restlearningjourney.store.orders.Order;
+import com.restlearningjourney.store.carts.CartEmptyException;
+import com.restlearningjourney.store.carts.CartNotFoundException;
+import com.restlearningjourney.store.carts.CartRepository;
+import com.restlearningjourney.store.orders.OrderRepository;
+import com.restlearningjourney.store.auth.AuthService;
+import com.restlearningjourney.store.carts.CartService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

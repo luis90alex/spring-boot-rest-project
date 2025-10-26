@@ -1,6 +1,6 @@
 package com.restlearningjourney.store.payments;
 
-import com.restlearningjourney.store.entities.PaymentStatus;
+import com.restlearningjourney.store.orders.PaymentStatus;
 
 public class PaymentResult {
 

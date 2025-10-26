@@ -1,6 +1,6 @@
 package com.restlearningjourney.store.payments;
 
-import com.restlearningjourney.store.entities.Order;
+import com.restlearningjourney.store.orders.Order;
 
 import java.util.Optional;
 
