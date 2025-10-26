@@ -1,15 +1,9 @@
-package com.restlearningjourney.store.controllers;
+package com.restlearningjourney.store.payments;
 
-import com.restlearningjourney.store.dtos.CheckoutRequest;
-import com.restlearningjourney.store.dtos.CheckoutResponse;
 import com.restlearningjourney.store.dtos.ErrorDto;
 import com.restlearningjourney.store.exceptions.CartEmptyException;
 import com.restlearningjourney.store.exceptions.CartNotFoundException;
 import com.restlearningjourney.store.exceptions.OrderNotFoundException;
-import com.restlearningjourney.store.exceptions.PaymentException;
-import com.restlearningjourney.store.repositories.OrderRepository;
-import com.restlearningjourney.store.services.CheckoutService;
-import com.restlearningjourney.store.services.WebhookRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

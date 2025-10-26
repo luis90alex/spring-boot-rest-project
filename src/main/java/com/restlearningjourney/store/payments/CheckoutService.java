@@ -1,4 +1,4 @@
-package com.restlearningjourney.store.services;
+package com.restlearningjourney.store.payments;
 
 import com.restlearningjourney.store.dtos.CheckoutRequest;
 import com.restlearningjourney.store.dtos.CheckoutResponse;
@@ -9,6 +9,8 @@ import com.restlearningjourney.store.exceptions.CartNotFoundException;
 import com.restlearningjourney.store.exceptions.PaymentException;
 import com.restlearningjourney.store.repositories.CartRepository;
 import com.restlearningjourney.store.repositories.OrderRepository;
+import com.restlearningjourney.store.services.AuthService;
+import com.restlearningjourney.store.services.CartService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

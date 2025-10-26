@@ -1,4 +1,4 @@
-package com.restlearningjourney.store.services;
+package com.restlearningjourney.store.payments;
 
 public class CheckoutSession {
 

@@ -1,4 +1,4 @@
-package com.restlearningjourney.store.config;
+package com.restlearningjourney.store.payments;
 
 import com.stripe.Stripe;
 import jakarta.annotation.PostConstruct;

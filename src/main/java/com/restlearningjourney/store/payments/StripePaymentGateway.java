@@ -1,4 +1,4 @@
-package com.restlearningjourney.store.services;
+package com.restlearningjourney.store.payments;
 
 import com.restlearningjourney.store.entities.Order;
 import com.restlearningjourney.store.entities.OrderItem;

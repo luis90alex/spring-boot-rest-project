@@ -1,4 +1,4 @@
-package com.restlearningjourney.store.dtos;
+package com.restlearningjourney.store.payments;
 
 import jakarta.validation.constraints.NotNull;
 

@@ -1,4 +1,4 @@
-package com.restlearningjourney.store.exceptions;
+package com.restlearningjourney.store.payments;
 
 public class PaymentException extends RuntimeException {
     public PaymentException(String message) {

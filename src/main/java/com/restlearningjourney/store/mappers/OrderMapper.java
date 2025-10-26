@@ -1,7 +1,7 @@
 package com.restlearningjourney.store.mappers;
 
 
-import com.restlearningjourney.store.dtos.CheckoutResponse;
+import com.restlearningjourney.store.payments.CheckoutResponse;
 import com.restlearningjourney.store.dtos.OrderDto;
 import com.restlearningjourney.store.entities.CartItem;
 import com.restlearningjourney.store.entities.Order;
