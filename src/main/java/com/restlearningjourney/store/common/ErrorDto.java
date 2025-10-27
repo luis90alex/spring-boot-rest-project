@@ -1,4 +1,4 @@
-package com.restlearningjourney.store.dtos;
+package com.restlearningjourney.store.common;
 
 public class ErrorDto {
     private String error;

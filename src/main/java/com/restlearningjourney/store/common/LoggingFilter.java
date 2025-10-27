@@ -1,4 +1,4 @@
-package com.restlearningjourney.store.filters;
+package com.restlearningjourney.store.common;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

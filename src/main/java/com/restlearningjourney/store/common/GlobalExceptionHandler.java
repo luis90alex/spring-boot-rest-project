@@ -1,6 +1,5 @@
-package com.restlearningjourney.store.controllers;
+package com.restlearningjourney.store.common;
 
-import com.restlearningjourney.store.dtos.ErrorDto;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;

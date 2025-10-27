@@ -1,4 +1,4 @@
-package com.restlearningjourney.store.controllers;
+package com.restlearningjourney.store.common;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

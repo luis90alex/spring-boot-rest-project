@@ -1,7 +1,7 @@
 package com.restlearningjourney.store.carts;
 
 
-import com.restlearningjourney.store.dtos.*;
+import com.restlearningjourney.store.common.ErrorDto;
 import com.restlearningjourney.store.products.ProductNotFoundException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

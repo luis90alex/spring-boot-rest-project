@@ -1,6 +1,6 @@
 package com.restlearningjourney.store.payments;
 
-import com.restlearningjourney.store.dtos.ErrorDto;
+import com.restlearningjourney.store.common.ErrorDto;
 import com.restlearningjourney.store.carts.CartEmptyException;
 import com.restlearningjourney.store.carts.CartNotFoundException;
 import com.restlearningjourney.store.orders.OrderNotFoundException;
