@@ -1,10 +1,12 @@
 package com.restlearningjourney.store.users;
 
+import com.restlearningjourney.store.common.ErrorDto;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -20,50 +22,29 @@ public class UserController {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+    private final UserService userService;
 
     @GetMapping
     public Iterable<UserDto> getAllUser(
             @RequestHeader(required = false, name ="X-Auth-Token") String authToken,
             @RequestParam(required = false, defaultValue = "", name ="sort")
             String sort) {
-
-        System.out.println("getAllUser - sort: " + sort);
-        System.out.println("getAllUser - authToken: " + authToken);
-
-        if(!Set.of("name", "email").contains(sort)){
-            sort ="name";
-        }
-
-        return userRepository.findAll(Sort.by(sort).ascending())
-                .stream()
-                .map( user -> userMapper.toDto(user))
-                .toList();
+        System.out.println("UserController - getAllUser - sort: " + sort);
+        System.out.println("UserController - getAllUser - authToken: " + authToken);
+        return userService.getAllUser(sort);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<UserDto> getUser(@PathVariable Long id){
-        var user =  userRepository.findById(id).orElse(null);
-        if (user == null){
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(userMapper.toDto(user));
+        UserDto userDto =  userService.getUser(id);
+        return ResponseEntity.ok(userDto);
     }
 
     @PostMapping
-    public ResponseEntity<?> registerUser(
+    public ResponseEntity<UserDto> registerUser(
             @Valid @RequestBody RegisterUserRequest request,
             UriComponentsBuilder uriBuilder){
-        if (userRepository.existsByEmail(request.getEmail())){
-            return ResponseEntity.badRequest().body(
-                    Map.of("email", "Email is already registered")
-            );
-        }
-        var user = userMapper.toEntity(request);
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setRole(Role.USER);
-        userRepository.save(user);
-
-        var userDto = userMapper.toDto(user);
+        UserDto userDto = userService.registerUser(request);
         var uri = uriBuilder.path("/users/{id}").buildAndExpand(userDto.getId()).toUri();
         return ResponseEntity.created(uri).body(userDto);
     }
@@ -73,43 +54,41 @@ public class UserController {
             @PathVariable(name ="id") Long id,
             @RequestBody UpdateUserRequest request)
     {
-        System.out.println("updateUser - id: " + id);
-        System.out.println("updateUser - request: " + request);
+        System.out.println("UserController - updateUser - id: " + id);
+        System.out.println("UserController - updateUser - request: " + request);
 
-        var user = userRepository.findById(id).orElse(null);
-        System.out.println(user);
-        if (user == null){
-            return ResponseEntity.notFound().build();
-        }
-        userMapper.updateUser(request,user);
-        System.out.println("After mapping" + user);
-        userRepository.save(user);
-        return ResponseEntity.ok(userMapper.toDto(user));
+        UserDto userDto = userService.updateUser(id, request);
+        return ResponseEntity.ok(userDto);
     }
 
     @DeleteMapping ("/{id}")
-    public ResponseEntity<UserDto> deleteUser(@PathVariable Long id){
-        var user = userRepository.findById(id).orElse(null);
-        if (user == null){
-            return ResponseEntity.notFound().build();
-        }
-        userRepository.delete(user);
-        return ResponseEntity.noContent().build();
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteUser(@PathVariable Long id){
+        userService.deleteUser(id);
     }
 
     @PostMapping("/{id}/change-password")
-    public ResponseEntity<Void> changePassword(
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void changePassword(
             @PathVariable Long id,
             @RequestBody ChangePasswordRequest request){
-        var user = userRepository.findById(id).orElse(null);
-        if (user == null){
-            return ResponseEntity.notFound().build();
-        }
-        if (!user.getPassword().equals(request.getOldPassword())){
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
-        user.setPassword(request.getNewPassword());
-        userRepository.save(user);
-        return  ResponseEntity.noContent().build();
+        userService.changePassword(id, request);
     }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<Void> handleUserNotFound(){
+        return ResponseEntity.notFound().build();
+    }
+
+    @ExceptionHandler(DuplicateUserException.class)
+    public ResponseEntity<ErrorDto> handleDuplicateUser(){
+        return ResponseEntity.badRequest().body(new ErrorDto("User already exists"));
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<Void> handleAccessDenied(){
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
+
+
 }
