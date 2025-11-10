@@ -3,30 +3,28 @@ package com.restlearningjourney.store.auth;
 import com.restlearningjourney.store.users.UserDto;
 import com.restlearningjourney.store.users.User;
 import com.restlearningjourney.store.users.UserMapper;
-import com.restlearningjourney.store.users.UserRepository;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
-@AllArgsConstructor
 public class AuthController {
 
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
-    private final AuthenticationManager authenticationManager;
-    private final JwtService jwtService;
+
     private final JwtConfig jwtConfig;
     private final UserMapper userMapper;
     private final AuthService authService;
+
+    public AuthController(JwtConfig jwtConfig, UserMapper userMapper, AuthService authService) {
+        this.jwtConfig = jwtConfig;
+        this.userMapper = userMapper;
+        this.authService = authService;
+    }
 
     @PostMapping("/login")
     public JwtResponse login(
