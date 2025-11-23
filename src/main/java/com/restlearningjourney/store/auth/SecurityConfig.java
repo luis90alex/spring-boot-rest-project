@@ -1,10 +1,8 @@
 package com.restlearningjourney.store.auth;
 
 import com.restlearningjourney.store.common.SecurityRules;
-import com.restlearningjourney.store.users.Role;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
