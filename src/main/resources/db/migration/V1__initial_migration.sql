@@ -23,7 +23,8 @@ CREATE TABLE products
     price         DECIMAL(10, 2) NOT NULL,
     `description` LONGTEXT       NOT NULL,
     category_id   TINYINT NULL,
-    CONSTRAINT `PRIMARY` PRIMARY KEY (id)
+    CONSTRAINT `PRIMARY` PRIMARY KEY (id),
+    CONSTRAINT unique_product_name UNIQUE (name)
 );
 
 CREATE TABLE profiles
