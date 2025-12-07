@@ -51,7 +51,7 @@ src/main/java
 If you want to reproduce the full API flow (login → products → cart → checkout → Stripe webhook),
 see the dedicated guide:
 
-👉 **[demo.md](./demo.md)**
+👉 **[DEMO.md](./DEMO.md)**
 
 This includes step-by-step curl commands, sample requests, expected responses, Stripe test flow,
 and troubleshooting tips used for portfolio demos and interviews.
