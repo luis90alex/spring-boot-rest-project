@@ -10,6 +10,7 @@ import javax.crypto.SecretKey;
 
 @Configuration
 @ConfigurationProperties(prefix = "spring.jwt")
+//Don't forget Kebab case properties
 @Data
 public class JwtConfig {
     private String secret;

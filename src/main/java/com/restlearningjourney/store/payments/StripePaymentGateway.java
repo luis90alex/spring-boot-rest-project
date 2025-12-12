@@ -94,7 +94,7 @@ public class StripePaymentGateway implements PaymentGateway {
         StripeObject stripeObject = event.getDataObjectDeserializer().getObject().orElseThrow(
                 () -> new PaymentException("Could not deserialize Stripe event. Check the SDK and API version")
         );
-        //Depending on the status and event it should be caste to a different object
+        //Depending on the status and event it should be cast to a different object
         // for example if the event = charge --> it should be cast to (Charge)
         // if event= payment_intent.succeeded --> cast to (PaymentObject)
         PaymentIntent paymentIntent = (PaymentIntent) stripeObject;

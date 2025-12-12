@@ -2,11 +2,13 @@ package com.restlearningjourney.store.products;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
 @AllArgsConstructor
 @Data
+@NoArgsConstructor
 public class ProductDto {
 
     private Long id;

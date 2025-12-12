@@ -8,10 +8,13 @@ import org.springframework.stereotype.Service;
 import java.util.Date;
 
 @Service
-@AllArgsConstructor
 public class JwtService {
 
     private final JwtConfig jwtConfig;
+
+    public JwtService(JwtConfig jwtConfig) {
+        this.jwtConfig = jwtConfig;
+    }
 
     public com.restlearningjourney.store.auth.Jwt generateAccessToken(User user) {
         return generateToken(user, jwtConfig.getAccessTokenExpiration());
