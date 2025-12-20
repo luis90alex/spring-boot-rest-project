@@ -51,7 +51,6 @@
         <dependency>
             <artifactId>mysql-connector-j</artifactId>
             <groupId>com.mysql</groupId>
-            <scope>runtime</scope>
         </dependency>
         <dependency>
             <artifactId>flyway-core</artifactId>
@@ -127,11 +126,36 @@
             <groupId>org.mockito</groupId>
             <artifactId>mockito-junit-jupiter</artifactId>
             <version>5.20.0</version>
+            <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Testcontainers core -->
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers</artifactId>
+            <version>2.0.3</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- MySQL container -->
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>mysql</artifactId>
+            <version>1.21.4</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- JUnit 5 integration -->
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>1.21.4</version>
             <scope>test</scope>
         </dependency>
 
