@@ -13,4 +13,4 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Echo the message
-        run: Echo "Hello world"
+        run: echo "Hello world"
