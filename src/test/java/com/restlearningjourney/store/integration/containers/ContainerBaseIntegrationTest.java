@@ -13,7 +13,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.time.Duration;
 
-@SpringBootTest
+@SpringBootTest(properties = "spring.profiles.active=test-container")
 @Testcontainers
 @ActiveProfiles("test-container") // use application-test-container.yml if overrides are needed
 public abstract class ContainerBaseIntegrationTest {

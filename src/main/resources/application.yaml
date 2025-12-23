@@ -11,8 +11,8 @@ spring:
       enabled: always
   main:
     banner-mode: console
-  profiles:
-    active: dev
+#  profiles:
+#    active: dev
 stripe:
   secretKey: ${STRIPE_SECRET_KEY}
   webhookSecretKey: ${STRIPE_WEBHOOK_SECRET_KEY}

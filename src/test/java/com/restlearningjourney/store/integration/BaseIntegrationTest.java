@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-@SpringBootTest
+@SpringBootTest(properties = "spring.profiles.active=test")
 @ActiveProfiles("test") // load application-test.yml
 public abstract class BaseIntegrationTest {
     @Autowired

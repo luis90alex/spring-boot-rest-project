@@ -34,9 +34,9 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@Import(CheckoutIntegrationTest.TestConfig.class)
+@Import(CheckoutIntegrationTestIT.TestConfig.class)
 @Transactional
-class CheckoutIntegrationTest extends BaseIntegrationTest{
+class CheckoutIntegrationTestIT extends BaseIntegrationTest{
 
     @Autowired
     private UserService userService;
