@@ -39,6 +39,8 @@ jobs:
     name: Integration tests (Testcontainers / Failsafe)
     runs-on: ubuntu-22.04
     needs: build-test # The previous job 'build-test' is needed
+    env:
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
     steps:
       - name: Repository checkout # Checkouts our repo to the runner
         uses: actions/checkout@v6
@@ -48,6 +50,9 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
           cache: 'maven'
+      - name: Debug JWT_SECRET length
+        run: |
+          echo "JWT_SECRET length: ${#JWT_SECRET}"
       # verify executes integration tests (failsafe) and unit tests are skipped
       - name: Run integration tests (verify)
         run: |
