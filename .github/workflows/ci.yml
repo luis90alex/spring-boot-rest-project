@@ -51,7 +51,7 @@ jobs:
       # verify executes integration tests (failsafe) and unit tests are skipped
       - name: Run integration tests (verify)
         run: |
-          ./mvnw -B -V -DskipTests=true verify
+          ./mvnw -B -V -DskipUnitTests=true verify
         timeout-minutes: 40
       - name: Upload failsafe reports
         if: always()
