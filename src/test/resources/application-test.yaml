@@ -15,3 +15,5 @@ spring:
     schemas: PUBLIC
     clean-disabled: false
 websiteUrl: http://localhost:4242
+stripe:
+  enabled: false

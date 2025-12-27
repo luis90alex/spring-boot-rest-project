@@ -12,12 +12,14 @@ import com.stripe.model.checkout.Session;
 import com.stripe.net.Webhook;
 import com.stripe.param.checkout.SessionCreateParams;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.Optional;
 
 @Service
+@ConditionalOnProperty(prefix = "stripe", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class StripePaymentGateway implements PaymentGateway {
 
     @Value("${websiteUrl}")
