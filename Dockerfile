@@ -20,7 +20,7 @@ RUN ./mvnw -B clean package -DskipTests
 # Stage 2: runtime with JRE 17 (Jammy Jellyfish)
 FROM eclipse-temurin:17-jre-jammy
 
-# Create an unprivileged user for better security
+# Create an unprivileged user for better security (TO DO)
 # RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
 
 WORKDIR /app
@@ -29,7 +29,7 @@ COPY --from=builder /app/target/store-1.0.0.jar app.jar
 
 # Expose port (informative)
 EXPOSE 8080
-# Healthcheck (optional pero recomendado)
+# Healthcheck (optional TO DO)
 #HEALTHCHECK --interval=30s --timeout=5s --start-period=30s \
 #  CMD curl -f http://localhost:8080/actuator/health || exit 1
 # Run as non-root

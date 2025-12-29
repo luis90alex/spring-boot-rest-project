@@ -1,0 +1,19 @@
+# Files ignored in the image building process
+# Maven target folder excluded
+target/
+
+# Git files not necessary in the image
+.git
+.gitignore
+
+# IDEs files excluded
+.idea
+*.iml
+.vscode
+
+# Logs
+*.log
+
+# OS files excluded (finder MacOs ,thumbs cache excluded)
+.DS_Store
+Thumbs.db
