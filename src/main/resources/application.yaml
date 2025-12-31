@@ -17,3 +17,50 @@ spring:
 stripe:
   secretKey: ${STRIPE_SECRET_KEY}
   webhookSecretKey: ${STRIPE_WEBHOOK_SECRET_KEY}
+management:
+  server:
+    # Actuator endpoints don't use the app port (by default 8080)
+    port: 8081
+  endpoints:
+    web:
+      base-path: /actuator
+      exposure:
+        # Allowed actuator endpoints (whitelist)
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      # It controls how much information is exposed.
+      # In prod use 'never' or 'when_authorized'. In dev use 'always'
+      show-details: when_authorized
+      probes:
+        # Allow /actuator/health/liveness and /actuator/health/readiness
+        # liveness = JVM alive?    readiness = can it receive traffic?
+        enabled: true
+  metrics:
+    tags:
+      # Added a global tag
+      application: store
+    distribution:
+      # Allows histograms to http latency, percentiles and latency thresholds (how many requests > x)
+      percentiles-histogram:
+        http.server.requests: true
+      percentiles:
+        http.server.requests: 0.5,0.95,0.99
+      sla:
+        http.server.requests: 100ms,300ms,500ms,1s
+    enable:
+      # Basic observability
+      jvm: true
+      system: true
+      process: true
+  # Exposes secrets, tokens and environment variables
+  info:
+    env:
+      enabled: false
+# These properties are commented because the git-commit-id +
+# the info generated in target/classes/META-INF/build-info.properties
+#info:
+#  app:
+#    name: ${project.artifactId}
+#    version: ${project.version}
+#    git-commit: ${git.commit.id.abbrev:unknown}

@@ -5,7 +5,7 @@ import org.springframework.security.config.annotation.web.configurers.AuthorizeH
 import org.springframework.stereotype.Component;
 
 @Component
-public class SwaggerSecurityRules implements SecurityRules {
+public class SwaggerAppSecurityRules implements AppSecurityRules {
     @Override
     public void configure(AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry registry) {
         registry.requestMatchers("/swagger-ui/**").permitAll()

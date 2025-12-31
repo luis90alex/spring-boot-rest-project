@@ -161,6 +161,11 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- Actuator dependency-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -196,11 +201,27 @@
                     <cleanDisabled>false</cleanDisabled>
                 </configuration>
             </plugin>
-
+            <!-- Customized maven plugin to create build.info used by Actuator-->
+            <!-- Every time the pase generate-resources is called, the build.info is generated-->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>build-info</id>
+                        <goals>
+                            <goal>build-info</goal>
+                        </goals>
+                        <phase>generate-resources</phase>
+                        <configuration>
+                            <additionalProperties>
+                                <java.version>${java.version}</java.version>
+                            </additionalProperties>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
+
             <!--Surefire plugin customized with skipUnitTests -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -225,6 +246,27 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+
+            <!-- git-commit-id plugin used by Actuator-->
+            <plugin>
+                <groupId>io.github.git-commit-id</groupId>
+                <artifactId>git-commit-id-maven-plugin</artifactId>
+                <version>9.0.2</version>
+                <executions>
+                    <execution>
+                        <id>get-the-git-infos</id>
+                        <goals>
+                            <goal>revision</goal>
+                        </goals>
+                        <phase>initialize</phase>
+                    </execution>
+                </executions>
+                <configuration>
+                    <generateGitPropertiesFile>true</generateGitPropertiesFile>
+                    <generateGitPropertiesFilename>${project.build.outputDirectory}/git.properties</generateGitPropertiesFilename>
+                    <commitIdGenerationMode>full</commitIdGenerationMode>
+                </configuration>
             </plugin>
 
         </plugins>

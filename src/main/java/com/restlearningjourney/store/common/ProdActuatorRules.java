@@ -7,9 +7,8 @@ import org.springframework.security.config.annotation.web.configurers.AuthorizeH
 import org.springframework.stereotype.Component;
 
 @Component
-@Order(0)
 @Profile("prod")
-public class ActuatorProdSecurityRules implements SecurityRules {
+public class ProdActuatorRules implements ActuatorSecurityRules {
     @Override
     public void configure(AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry registry) {
         registry.requestMatchers("/actuator/health/**").permitAll()

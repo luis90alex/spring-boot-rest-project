@@ -1,12 +1,15 @@
 package com.restlearningjourney.store.auth;
 
-import com.restlearningjourney.store.common.SecurityRules;
+import com.restlearningjourney.store.common.ActuatorSecurityRules;
+import com.restlearningjourney.store.common.AppSecurityRules;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -27,12 +30,14 @@ public class SecurityConfig {
 
     private final UserDetailsService userDetailsService;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
-    private final List<SecurityRules> featureSecurityRules;
+    private final List<AppSecurityRules> featureAppSecurityRules;
+    private final List<ActuatorSecurityRules> actuatorSecurityRules;
 
-    public SecurityConfig(UserDetailsService userDetailsService, JwtAuthenticationFilter jwtAuthenticationFilter, List<SecurityRules> featureSecurityRules) {
+    public SecurityConfig(UserDetailsService userDetailsService, JwtAuthenticationFilter jwtAuthenticationFilter, List<AppSecurityRules> featureAppSecurityRules, List<ActuatorSecurityRules> actuatorSecurityRules) {
         this.userDetailsService = userDetailsService;
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
-        this.featureSecurityRules = featureSecurityRules;
+        this.featureAppSecurityRules = featureAppSecurityRules;
+        this.actuatorSecurityRules = actuatorSecurityRules;
     }
 
     @Bean
@@ -54,6 +59,22 @@ public class SecurityConfig {
     }
 
     @Bean
+    @Order(0) // Actuator rules come first
+    public SecurityFilterChain actuatorSecurityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .securityMatcher("/actuator/**") // only actuator endpoints
+                .authorizeHttpRequests(auth ->
+                        actuatorSecurityRules.forEach(r -> r.configure(auth)))
+                .httpBasic(Customizer.withDefaults()) // Basic Auth
+                .csrf(AbstractHttpConfigurer::disable)
+                .sessionManagement(c ->
+                        c.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+
+        return http.build();
+    }
+
+    @Bean
+    @Order(1)
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         // Stateless sessions (token-based)
         // Disable CSRF (cross site request forgery) Falsificacion de solicitud entre sitos
@@ -64,7 +85,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(c ->
                         {
-                            featureSecurityRules.forEach(rule -> rule.configure(c));
+                            featureAppSecurityRules.forEach(rule -> rule.configure(c));
                             c.anyRequest().authenticated();
                         }
                 )

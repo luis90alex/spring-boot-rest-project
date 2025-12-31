@@ -4,9 +4,9 @@ spring:
     # To run the app + db inside docker containers, use the docker url
     # Remember that database data defined in compose.yml should match with the datasource url data here
     # local mysql datasource url
-    # url: jdbc:mysql://localhost:3306/store_api?createDatabaseIfNotExist=true
+    url: jdbc:mysql://localhost:3306/store_api?createDatabaseIfNotExist=true
     # Docker mysql datasource url
-    url: jdbc:mysql://mysql:3306/${MYSQL_DATABASE}?createDatabaseIfNotExist=true
+    # url: jdbc:mysql://mysql:3306/${MYSQL_DATABASE}?createDatabaseIfNotExist=true
     username: ${MYSQL_USER}
     password: ${MYSQL_PASSWORD}
   jpa:
@@ -16,4 +16,13 @@ spring:
       enabled: always
   main:
     banner-mode: console
-websiteUrl: http://localhost:4242
+websiteUrl: http://localhost:8080
+management:
+  endpoint:
+    health:
+      show-details: always   # in dev, everything can be shown
+  endpoints:
+    web:
+      exposure:
+        # Allowed actuator endpoints (whitelist)
+        include: "*"

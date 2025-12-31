@@ -1,6 +1,6 @@
 package com.restlearningjourney.store.products;
 
-import com.restlearningjourney.store.common.SecurityRules;
+import com.restlearningjourney.store.common.AppSecurityRules;
 import com.restlearningjourney.store.users.Role;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -8,7 +8,7 @@ import org.springframework.security.config.annotation.web.configurers.AuthorizeH
 import org.springframework.stereotype.Component;
 
 @Component
-public class ProductSecurityRules implements SecurityRules {
+public class ProductAppSecurityRules implements AppSecurityRules {
     @Override
     public void configure(AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry registry) {
         registry.requestMatchers(HttpMethod.GET, "/products/**").permitAll()
