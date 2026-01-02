@@ -11,9 +11,8 @@ import org.springframework.stereotype.Component;
 public class ProdActuatorRules implements ActuatorSecurityRules {
     @Override
     public void configure(AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry registry) {
-        registry.requestMatchers("/actuator/health/**").permitAll()
+        registry.requestMatchers("/actuator/health").permitAll()
                 .requestMatchers("/actuator/prometheus").hasRole("ACTUATOR")
-                .requestMatchers("/actuator/info").hasRole("ACTUATOR")
-                .anyRequest().denyAll();
+                .requestMatchers("/actuator/info").hasRole("ACTUATOR");
     }
 }

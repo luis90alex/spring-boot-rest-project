@@ -44,10 +44,6 @@
             box-shadow: 0 3px 8px rgba(15, 23, 42, 0.04);
         }
 
-        .health-badge.up { background: var(--accent); color: white; }
-        .health-badge.down { background: #dc3545; color: white; }
-        .health-badge.unknown { background: #6c757d; color: white; }
-
         footer {
             color: var(--muted);
             padding: 1.25rem 0;
@@ -56,10 +52,9 @@
 </head>
 
 <body>
-<nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom" role="navigation" aria-label="Main navigation">
+<nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom">
     <div class="container">
         <a class="navbar-brand fw-bold" th:href="@{/}">Store</a>
-
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
                 data-bs-target="#mainNav" aria-controls="mainNav"
                 aria-expanded="false" aria-label="Toggle navigation">
@@ -69,24 +64,8 @@
         <div class="collapse navbar-collapse" id="mainNav">
             <ul class="navbar-nav ms-auto align-items-center gap-2">
                 <li class="nav-item"><a class="nav-link" th:href="@{/products}">Products</a></li>
-                <li class="nav-item"><a class="nav-link" th:href="@{/docs}">Docs</a></li>
                 <li class="nav-item"><a class="nav-link" th:href="@{/actuator}">Actuator</a></li>
-
-                <!-- Authentication status -->
-                <li class="nav-item ms-3" th:if="${userAuthenticated}">
-                    <span class="badge bg-success" role="status">Authenticated</span>
-                </li>
-
-                <li class="nav-item ms-3" th:unless="${userAuthenticated}">
-                    <span class="badge bg-secondary" role="status">Anonymous</span>
-                </li>
-
-                <li class="nav-item ms-3">
-                    <span id="healthBadge"
-                          class="badge health-badge unknown"
-                          role="status"
-                          aria-live="polite">loading</span>
-                </li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/swagger-ui.html}">Swagger</a></li>
             </ul>
         </div>
     </div>
@@ -107,7 +86,7 @@
                         </p>
                         <div class="d-flex gap-2">
                             <a class="btn btn-primary" th:href="@{/products}">View products</a>
-                            <a class="btn btn-outline-secondary" th:href="@{/docs}">Documentation</a>
+                            <a class="btn btn-outline-secondary" th:href="@{/swagger-ui.html}">Swagger</a>
                         </div>
                     </div>
 
@@ -170,8 +149,9 @@
                 <div class="card p-3">
                     <div class="d-flex flex-wrap gap-2">
                         <a class="btn btn-outline-primary btn-sm" th:href="@{/actuator/health}">Health</a>
-                        <a class="btn btn-outline-primary btn-sm" th:href="@{/actuator/prometheus}">Prometheus</a>
+                        <a class="btn btn-outline-primary btn-sm" th:href="@{/actuator/info}">Info</a>
                         <a class="btn btn-outline-primary btn-sm" th:href="@{/actuator/metrics}">Metrics</a>
+                        <a class="btn btn-outline-primary btn-sm" th:href="@{/actuator/prometheus}">Prometheus</a>
                         <a class="btn btn-outline-secondary btn-sm" th:href="@{/swagger-ui.html}">Swagger</a>
                     </div>
                 </div>
@@ -182,7 +162,7 @@
     <footer class="mt-5" role="contentinfo">
         <div class="d-flex justify-content-between">
             <div>
-                © <span th:text="${#dates.format(#dates.createNow(),'yyyy')}">2025</span> Store
+                © <span th:text="${#dates.format(#dates.createNow(),'yyyy')}">2026</span> Store
             </div>
             <div class="text-muted">Spring Boot</div>
         </div>
@@ -198,16 +178,11 @@
 
         function setStatus(status) {
             const s = (status || 'UNKNOWN').toUpperCase();
-            badge.textContent = s;
-            text.textContent = s;
-            badge.className = 'badge health-badge ' +
-                (s === 'UP' ? 'up' : s === 'DOWN' ? 'down' : 'unknown');
+            if(badge) badge.textContent = s;
+            if(text) text.textContent = s;
         }
 
-        const controller = new AbortController();
-        setTimeout(() => controller.abort(), 3000);
-
-        fetch('/actuator/health', { signal: controller.signal })
+        fetch('/actuator/health')
             .then(r => r.ok ? r.json() : Promise.reject())
             .then(j => setStatus(j.status))
             .catch(() => setStatus('UNKNOWN'));

@@ -16,6 +16,7 @@ public class HomeController {
 
     @GetMapping("/")
     public String index(Model model) {
+        System.out.println("HomeController.index");
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
         boolean authenticated =
