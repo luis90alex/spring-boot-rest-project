@@ -1,0 +1,42 @@
+global:
+  # Interval settings. Evaluation is used mostly for alerts
+  scrape_interval: 10s
+  scrape_timeout: 5s
+  evaluation_interval: 10s
+
+  external_labels:
+    environment: "dev"
+    monitoring: "prometheus"
+
+scrape_configs:
+
+  # =========================
+  # Spring Boot – Store
+  # =========================
+  - job_name: 'spring-boot-store'
+    metrics_path: '/actuator/prometheus'
+    scheme: http
+    scrape_interval: 5s
+    scrape_timeout: 3s
+
+    static_configs:
+      - targets:
+          # If the Java app runs on the local host, use:
+          #   targets: ['host.docker.internal:8080']
+          # If the Java app runs in a Docker container on the same network as Prometheus, use:
+          #   targets: ['service_name:8080']
+          - 'host.docker.internal:8080'
+        labels:
+          application: 'ecommerce-service'
+          team: 'backend'
+
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+
+  # =========================
+  # Prometheus self-monitoring
+  # =========================
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']

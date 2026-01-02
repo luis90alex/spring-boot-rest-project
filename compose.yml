@@ -1,44 +1,91 @@
 # File to define one container with spring boot  app and another with mysql database
 services:
-  # Service name used for the spring boot app
-  spring-rest-store:
-    image: spring-rest-store-image
-    # Used dockerfile in the same path (.) to build the image
-    build:
-      context: .
-      # Dockerfile name
-      dockerfile: Dockerfile
-    # build: .  --> same configuration but not customizable
-    # Mapping ports 8080 from my local is mapped to 8080 from the container
-    ports:
-      - "8080:8080"
-    # We assure that mysql service is started before running this java service
-    # Read all the values defined in my .env file
-    env_file:
-      - .env
-    # TO DO (spring boot retries or wait-fot-it.sh)
-    depends_on:
-      - mysql
-    restart: unless-stopped
-  # Container with mysql database. Service name = mysql (used in application-dev.yaml)
-  mysql:
-    image: mysql:8.0.44
-    # Environment variables used to configure mysql. Only root password is mandatory
-    # A generic user is used in this app. These values should match application-dev.yaml
+#  # Service name used for the spring boot app
+#  spring-rest-store:
+#    image: spring-rest-store-image
+#    # Used dockerfile in the same path (.) to build the image
+#    build:
+#      context: .
+#      # Dockerfile name
+#      dockerfile: Dockerfile
+#    # build: .  --> same configuration but not customizable
+#    # Mapping ports 8080 from my local is mapped to 8080 from the container
+#    ports:
+#      - "8080:8080"
+#    # We assure that mysql service is started before running this java service
+#    # Read all the values defined in my .env file
+#    env_file:
+#      - .env
+#    # TO DO (spring boot retries or wait-fot-it.sh)
+#    depends_on:
+#      - mysql
+#    restart: unless-stopped
+#  # Container with mysql database. Service name = mysql (used in application-dev.yaml)
+#  mysql:
+#    image: mysql:8.0.44
+#    # Environment variables used to configure mysql. Only root password is mandatory
+#    # A generic user is used in this app. These values should match application-dev.yaml
+#
+#    environment:
+#      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+#      MYSQL_DATABASE: ${MYSQL_DATABASE}
+#      MYSQL_USER: ${MYSQL_USER}
+#      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+#    ports:
+#      # I'm already using 3306 in my local, so I prefer using 3307 to access container 3306 port
+#      - "3307:3306"
+#    # A volume is created to persist data
+#    volumes:
+#      - mysql-volume:/var/lib/mysql
+#    # Networks can be specified but by default docker creates an internal network
+#    # So there's no need to specify it
 
-    environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-    ports:
-      # I'm already using 3306 in my local, so I prefer using 3307 to access container 3306 port
-      - "3307:3306"
-    # A volume is created to persist data
+  prometheus:
+    # version used in 31/12/2025
+    image: prom/prometheus:v3.8.1
+    # Skipped container_name to allow using docker swam in the future
+    # Optional command to indicate prometheus where is the config file that it should use
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
     volumes:
-      - mysql-volume:/var/lib/mysql
-    # Networks can be specified but by default docker creates an internal network
-    # So there's no need to specify it
+      # bind mount ro = read only
+      - ./docker-config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9090/-/healthy"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  grafana:
+    # Stable version on 31/12/2025
+    image: grafana/grafana:12.3
+    # Skipped container_name to allow using docker swam in the future
+    # container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      # admin password, used it here to skip password change request
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      # Automatic datasource Provisioning (Prometheus)
+      - ./docker-config/grafana/grafana-datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml:ro
+      # Automatic dashboards Provisioning
+      #- ./docker-config/grafana/grafana-dashboards.yml:/etc/grafana/provisioning/dashboards/dashboards.yml:ro
+      # JSON dashboards folder (read only)
+      #- ./docker-config/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      # Persistent volume for grafana dara (users, alerts, manual dashboards)
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:3000/healthz" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
 # List of used volumes
 volumes:
-  mysql-volume:
+  #mysql-volume:
+  grafana-data:

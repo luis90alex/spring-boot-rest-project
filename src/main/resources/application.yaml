@@ -18,9 +18,6 @@ stripe:
   secretKey: ${STRIPE_SECRET_KEY}
   webhookSecretKey: ${STRIPE_WEBHOOK_SECRET_KEY}
 management:
-  server:
-    # Actuator endpoints don't use the app port (by default 8080)
-    port: 8081
   endpoints:
     web:
       base-path: /actuator

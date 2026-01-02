@@ -2,7 +2,6 @@ package com.restlearningjourney.store.auth;
 
 import com.restlearningjourney.store.users.User;
 import io.jsonwebtoken.*;
-import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
