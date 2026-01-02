@@ -52,7 +52,6 @@ public class UserService {
 
         var user = userRepository.findById(id).orElseThrow(UserNotFoundException::new);
         userMapper.updateUser(request,user);
-        System.out.println("After mapping" + user);
         userRepository.save(user);
         return userMapper.toDto(user);
     }

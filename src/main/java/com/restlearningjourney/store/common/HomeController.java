@@ -1,5 +1,7 @@
 package com.restlearningjourney.store.common;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -14,9 +16,11 @@ public class HomeController {
     @Value("${application.version:0.0.1}")
     private String version;
 
+    private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
+
     @GetMapping("/")
     public String index(Model model) {
-        System.out.println("HomeController.index");
+        logger.info("HomeController.index");
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
         boolean authenticated =

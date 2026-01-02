@@ -2,6 +2,8 @@ package com.restlearningjourney.store.users;
 
 import com.restlearningjourney.store.common.ErrorDto;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -13,6 +15,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 public class UserController {
 
     private final UserService userService;
+    private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
     public UserController(UserService userService) {
         this.userService = userService;
@@ -23,8 +26,8 @@ public class UserController {
             @RequestHeader(required = false, name ="X-Auth-Token") String authToken,
             @RequestParam(required = false, defaultValue = "", name ="sort")
             String sort) {
-        System.out.println("UserController - getAllUser - sort: " + sort);
-        System.out.println("UserController - getAllUser - authToken: " + authToken);
+        logger.info("UserController - getAllUser - sort: {}", sort);
+        logger.info("UserController - getAllUser - authToken: {}" , authToken);
         return userService.getAllUser(sort);
     }
 
@@ -48,8 +51,8 @@ public class UserController {
             @PathVariable(name ="id") Long id,
             @RequestBody UpdateUserRequest request)
     {
-        System.out.println("UserController - updateUser - id: " + id);
-        System.out.println("UserController - updateUser - request: " + request);
+        logger.info("UserController - updateUser - id: {}" , id);
+        logger.info("UserController - updateUser - request: {}" , request);
 
         UserDto userDto = userService.updateUser(id, request);
         return ResponseEntity.ok(userDto);

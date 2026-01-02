@@ -1,5 +1,7 @@
 package com.restlearningjourney.store.products;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -10,6 +12,8 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final ProductMapper productMapper;
     private final CategoryRepository categoryRepository;
+    private static final Logger logger = LoggerFactory.getLogger(ProductService.class);
+
 
     public ProductService(ProductRepository productRepository, ProductMapper productMapper, CategoryRepository categoryRepository) {
         this.productRepository = productRepository;
@@ -40,7 +44,7 @@ public class ProductService {
     }
 
     public ProductDto createProduct(ProductDto productDto) {
-        System.out.println("createProduct - productDto = " + productDto);
+        logger.info("createProduct - productDto = {}" , productDto);
 
         var product =  productMapper.toEntity(productDto);
         Category category = categoryRepository.findById(productDto.getCategoryId())
@@ -51,14 +55,14 @@ public class ProductService {
         product.setCategory(category);
         productRepository.save(product);
         productDto.setId(product.getId());
-        System.out.println("createProduct - productDto Including id = " + productDto);
+        logger.info("createProduct - productDto Including id = {}" , productDto);
         return productDto;
     }
 
     public ProductDto updateProduct(Long id, ProductDto productDto) {
 
-        System.out.println("updateProduct - id = " + id);
-        System.out.println("updateProduct - product = " + productDto);
+        logger.info("updateProduct - id = {}" , id);
+        logger.info("updateProduct - product = {}" , productDto);
         var category = categoryRepository.findById(productDto.getCategoryId()).orElse(null);
         if (category == null){
             throw new CategoryNotFoundException();
@@ -67,7 +71,7 @@ public class ProductService {
         if (productDb == null){
             throw new ProductNotFoundException();
         }
-        System.out.println(productDb);
+        logger.info("productDb = {}",productDb);
         productMapper.updateProduct(productDto, productDb);
         productDb.setCategory(category);
         productRepository.save(productDb);
@@ -76,7 +80,7 @@ public class ProductService {
     }
 
     public void deleteProduct(Long id) {
-        System.out.println("deleteProduct - id = " + id);
+        logger.info("deleteProduct - id = {}" , id);
         var product = productRepository.findById(id).orElse(null);
         if (product == null){
             throw new ProductNotFoundException();

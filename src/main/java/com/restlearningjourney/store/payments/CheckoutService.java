@@ -8,6 +8,8 @@ import com.restlearningjourney.store.carts.CartRepository;
 import com.restlearningjourney.store.orders.OrderRepository;
 import com.restlearningjourney.store.auth.AuthService;
 import com.restlearningjourney.store.carts.CartService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +21,8 @@ public class CheckoutService {
     private final CartService cartService;
     private final AuthService authService;
     private final PaymentGateway paymentGateway;
+    private static final Logger logger = LoggerFactory.getLogger(CheckoutService.class);
+
 
     public CheckoutService(CartRepository cartRepository, CartService cartService, AuthService authService, OrderRepository orderRepository, PaymentGateway paymentGateway) {
         this.cartRepository = cartRepository;
@@ -42,7 +46,7 @@ public class CheckoutService {
         orderRepository.save(order);
         try {
             CheckoutSession session = paymentGateway.createCheckoutSession(order);
-            System.out.println("Order created " + order);
+            logger.info("Order created order = {}" , order);
             CheckoutResponse checkoutResponse = new CheckoutResponse();
             checkoutResponse.setId(order.getId());
             checkoutResponse.setCheckoutUrl(session.getCheckoutUrl());
@@ -51,7 +55,7 @@ public class CheckoutService {
 
             return checkoutResponse;
         }catch (PaymentException ex){
-            System.out.println(ex.getMessage());
+            logger.info(ex.getMessage());
             orderRepository.delete(order);
             throw ex;
         }

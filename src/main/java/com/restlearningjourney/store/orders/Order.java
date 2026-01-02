@@ -108,7 +108,6 @@ public class Order {
 
         cart.getItems().forEach(item -> {
             OrderItem orderItem = new OrderItem(order, item.getProduct(), item.getQuantity());
-            System.out.println(orderItem);
             order.items.add(orderItem);
         });
         return order;

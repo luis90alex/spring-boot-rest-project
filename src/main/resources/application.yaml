@@ -14,6 +14,9 @@ spring:
   # In my railway deploy the profile is set to "prod"
   profiles:
     active: dev
+logging:
+  file:
+    path: logs
 stripe:
   secretKey: ${STRIPE_SECRET_KEY}
   webhookSecretKey: ${STRIPE_WEBHOOK_SECRET_KEY}

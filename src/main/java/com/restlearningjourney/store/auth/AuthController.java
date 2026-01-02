@@ -41,9 +41,6 @@ public class AuthController {
         cookie.setSecure(true);//only accessible from https
         response.addCookie(cookie);
 
-        System.out.println(refreshToken);
-        System.out.println(cookie);
-
         return new JwtResponse(loginResponse.getAccessToken().toString());
     }
 
@@ -68,7 +65,6 @@ public class AuthController {
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<Void> handleBadCredentialsException() {
-        System.out.println("Bad credentialsException");
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 }

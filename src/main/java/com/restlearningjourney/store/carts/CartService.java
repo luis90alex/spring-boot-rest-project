@@ -4,6 +4,8 @@ package com.restlearningjourney.store.carts;
 import com.restlearningjourney.store.products.ProductNotFoundException;
 import com.restlearningjourney.store.products.ProductRepository;
 import lombok.AllArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -15,6 +17,7 @@ public class CartService {
     private final ProductRepository productRepository;
     private CartMapper cartMapper;
     private CartRepository cartRepository;
+    private static final Logger logger = LoggerFactory.getLogger(CartService.class);
 
     public CartDto createCart() {
         var cart = new Cart();
@@ -33,14 +36,14 @@ public class CartService {
         }
         var cartItem = cart.addItem(product);
 
-        System.out.println("Before saving CartItem Object");
-        System.out.println(cartItem);
+        logger.info("Before saving CartItem Object");
+        logger.info("cartItem = {}", cartItem);
 
         cartRepository.save(cart);
-        System.out.println("After saving Cart Object");
-        System.out.println(cartItem);
+        logger.info("After saving Cart Object");
+        logger.info("cartItem = {}", cartItem);
         var cartItemDto = cartMapper.toDto(cartItem);
-        System.out.println(cartItemDto);
+        logger.info("cartItemDto = {}",cartItemDto);
         return cartItemDto;
     }
 
@@ -50,7 +53,7 @@ public class CartService {
             throw new CartNotFoundException();
         }
         var cartDto = cartMapper.toDto(cart);
-        System.out.println(cartDto);
+        logger.info( "cartDto = {}", cartDto);
         return cartDto;
     }
 
@@ -75,8 +78,8 @@ public class CartService {
         }
         cart.removeItem(productId);
         cartRepository.save(cart);
-        System.out.println("After deleting CartItem Object");
-        System.out.println(cart);
+        logger.info("After deleting CartItem Object");
+        logger.info( "cart = {}",cart);
     }
 
     public void clearCart(UUID cartId) {

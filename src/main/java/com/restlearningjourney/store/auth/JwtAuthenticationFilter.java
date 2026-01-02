@@ -5,6 +5,8 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -20,13 +22,15 @@ import java.util.List;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private JwtService jwtService;
+    private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
+
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        System.out.println("doFilter internal - Init JwtAuthenticationFilter");
+        logger.info("doFilter internal - Init JwtAuthenticationFilter");
         String authHeader = request.getHeader("Authorization");
         if (authHeader ==  null || !authHeader.startsWith("Bearer ")) {
-            System.out.println("doFilterInternal - Null or invalid Authorization header");
+            logger.info("doFilterInternal - Null or invalid Authorization header");
             filterChain.doFilter(request, response);
             return;
         }
@@ -35,7 +39,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         Jwt jwt = jwtService.parse(token);
 
         if(jwt == null || jwt.isExpired()){
-            System.out.println("doFilterInternal - Invalid token ");
+            logger.info("doFilterInternal - Invalid token ");
             filterChain.doFilter(request, response);
             return;
         }
@@ -48,7 +52,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 new WebAuthenticationDetailsSource().buildDetails(request)
         );
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        System.out.println("doFilterInternal - Authenticated");
+        logger.info("doFilterInternal - Authenticated");
         filterChain.doFilter(request, response);
     }
 }

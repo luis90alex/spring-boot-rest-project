@@ -24,8 +24,6 @@ public class CheckoutController {
     @PostMapping
     public CheckoutResponse checkout(
             @RequestBody @Valid CheckoutRequest request) {
-        System.out.println("OrderController:checkout");
-        System.out.println("CartId = " + request.getCartId());
         return checkoutService.checkout(request);
     }
 

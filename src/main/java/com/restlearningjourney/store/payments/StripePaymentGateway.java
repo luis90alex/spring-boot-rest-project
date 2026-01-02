@@ -11,6 +11,8 @@ import com.stripe.model.StripeObject;
 import com.stripe.model.checkout.Session;
 import com.stripe.net.Webhook;
 import com.stripe.param.checkout.SessionCreateParams;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
@@ -27,6 +29,8 @@ public class StripePaymentGateway implements PaymentGateway {
 
     @Value("${stripe.webhookSecretKey}")
     private String webhookSecretKey;
+
+    private static final Logger logger = LoggerFactory.getLogger(StripePaymentGateway.class);
 
     public StripePaymentGateway() {
     }
@@ -50,7 +54,7 @@ public class StripePaymentGateway implements PaymentGateway {
             Session session = Session.create(sessionCreateParams);
             return new CheckoutSession(session.getUrl());
         } catch (StripeException ex) {
-            System.out.println(ex.getMessage());
+            logger.error("createCheckoutSession error ex = {}" ,ex.getMessage());
             throw new PaymentException() ;
         }
     }
@@ -64,29 +68,30 @@ public class StripePaymentGateway implements PaymentGateway {
     @Override
     public Optional<PaymentResult> parseWebhookRequest(WebhookRequest request) {
         try {
-            System.out.println("StripePaymentGateway:parseWebhookRequest");
+            logger.info("StripePaymentGateway:parseWebhookRequest");
             String payload = request.getPayload();
             String signature = request.getHeaders().get("stripe-signature");
 
             Event event = Webhook.constructEvent(payload, signature,webhookSecretKey);
-            System.out.println("handleWebHook eventType : " + event.getType());
+            logger.info("handleWebHook eventType : {}" ,event.getType());
 
             switch (event.getType()) {
                 case "payment_intent.succeeded" ->{
-                    System.out.println("Accessing Case payment_intent.succeeded");
+                    logger.info("Accessing Case payment_intent.succeeded");
                     return Optional.of(new PaymentResult(extractOrderId(event), PaymentStatus.PAID));
                 }
                 case "payment_intent.payment_failed" ->{
-                    System.out.println("Accessing Case payment_intent.payment_failed");
+                    logger.info("Accessing Case payment_intent.payment_failed");
                     return Optional.of(new PaymentResult(extractOrderId(event), PaymentStatus.FAILED));
                 }
                 default -> {
-                    System.out.println("Default case");
+                    logger.info("Default case");
                     return Optional.empty();
                 }
             }
 
         } catch (SignatureVerificationException e) {
+            logger.error("handleWebHook SignatureVerificationException ex = {}" ,e.getMessage());
             throw new PaymentException("Invalid signature");
         }
     }
@@ -101,7 +106,7 @@ public class StripePaymentGateway implements PaymentGateway {
         // if event= payment_intent.succeeded --> cast to (PaymentObject)
         PaymentIntent paymentIntent = (PaymentIntent) stripeObject;
         String orderId = paymentIntent.getMetadata().get("order_id");
-        System.out.println("ExtractOrderId " + orderId);
+        logger.info("ExtractOrderId = {}" , orderId);
         return Long.valueOf(orderId);
     }
 

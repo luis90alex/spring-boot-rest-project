@@ -12,6 +12,7 @@ target/
 .vscode
 
 # Logs
+logs/
 *.log
 
 # OS files excluded (finder MacOs ,thumbs cache excluded)

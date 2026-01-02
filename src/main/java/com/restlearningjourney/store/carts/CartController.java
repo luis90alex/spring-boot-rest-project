@@ -7,6 +7,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,12 +22,12 @@ import java.util.UUID;
 @Tag(name= "Carts")
 public class CartController {
     private final CartService cartService;
+    private static final Logger logger = LoggerFactory.getLogger(CartService.class);
 
     @PostMapping
     public ResponseEntity<CartDto> createCart(
             UriComponentsBuilder uriComponentsBuilder) {
         var cartDto= cartService.createCart();
-        System.out.println(cartDto);
         var uri =  uriComponentsBuilder.path("/carts/{id}").buildAndExpand(cartDto.getId()).toUri();
         return ResponseEntity.created(uri).body(cartDto);
     }
@@ -35,8 +37,8 @@ public class CartController {
     public ResponseEntity<CartItemDto> addProductToCart(
             @PathVariable(name = "cartId") UUID cartId,
             @RequestBody @Valid AddItemToCartRequest request) {
-        System.out.println("addProductToCart " + request);
-        System.out.println("addProductToCart " + cartId);
+        logger.info("addProductToCart request = {}", request);
+        logger.info("addProductToCart cartId = {} ", cartId);
 
         var cartItemDto = cartService.addToCart(cartId, request.getProductId());
         return ResponseEntity.status(HttpStatus.CREATED).body(cartItemDto);
@@ -53,9 +55,9 @@ public class CartController {
             @PathVariable(name = "productId") Long productId,
             @RequestBody @Valid UpdateCartItemRequest request){
 
-        System.out.println("updateProduct " + request);
-        System.out.println("updateProduct " + cartId);
-        System.out.println("updateProduct " + productId);
+        logger.info("updateProduct request=  {}", request);
+        logger.info("updateProduct cartId = {}" ,cartId);
+        logger.info("updateProduct productId = {}", productId);
         return cartService.updateCart(cartId, productId, request.getQuantity());
     }
 

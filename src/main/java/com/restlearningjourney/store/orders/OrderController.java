@@ -1,6 +1,8 @@
 package com.restlearningjourney.store.orders;
 
 import com.restlearningjourney.store.common.ErrorDto;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -14,6 +16,7 @@ import java.util.Map;
 public class OrderController {
 
     private final OrderService orderService;
+    private static final Logger logger = LoggerFactory.getLogger(OrderController.class);
 
     public OrderController(OrderService orderService) {
         this.orderService = orderService;
@@ -21,7 +24,7 @@ public class OrderController {
 
     @GetMapping
     public ResponseEntity<List<OrderDto>> getAllOrders() {
-        System.out.println("OrderController:getAllOrders");
+        logger.info("OrderController:getAllOrders");
         List<OrderDto> orderDtos =  orderService.getAllOrders();
         return ResponseEntity.ok(orderDtos);
     }
@@ -29,7 +32,7 @@ public class OrderController {
     @GetMapping("/{orderId}")
     public ResponseEntity<OrderDto> getOrder(
             @PathVariable("orderId") Long orderId) {
-        System.out.println("OrderController:getOrder");
+        logger.info("OrderController:getOrder");
         OrderDto orderDto = orderService.getOrder(orderId);
         return ResponseEntity.ok(orderDto);
     }

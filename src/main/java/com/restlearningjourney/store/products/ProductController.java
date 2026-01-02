@@ -1,6 +1,8 @@
 package com.restlearningjourney.store.products;
 
 import com.restlearningjourney.store.common.ErrorDto;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,6 +15,7 @@ import java.util.List;
 public class ProductController {
 
     private final ProductService productService;
+    private static final Logger logger = LoggerFactory.getLogger(ProductController.class);
 
     public ProductController(ProductService productService) {
         this.productService = productService;
@@ -21,7 +24,7 @@ public class ProductController {
     @GetMapping()
     public List<ProductDto> getAllProducts
             (@RequestParam(required = false, name ="categoryId") Byte categoryId) {
-        System.out.println("getAllProducts - categoryId = " + categoryId);
+        logger.info("getAllProducts - categoryId = {}", categoryId);
         return productService.getAllProducts(categoryId);
     }
 
@@ -38,7 +41,7 @@ public class ProductController {
 
         ProductDto productDto = productService.createProduct(productDtoRequest);
         var uri = uriBuilder.path("/products/{id}").buildAndExpand(productDto.getId()).toUri();
-        System.out.println("createProduct - uri = " + uri);
+        logger.info("createProduct - uri = {} " , uri);
         return ResponseEntity.created(uri).body(productDto);
     }
 
