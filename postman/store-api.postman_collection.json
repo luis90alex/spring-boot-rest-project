@@ -102,14 +102,7 @@
 							"type": "noauth"
 						},
 						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI3IiwiaWF0IjoxNzYwNDgxNjQ0LCJuYW1lIjoiTHVpczgiLCJlbWFpbCI6InVzZXJfaEBkb21haW4uY29tIiwicm9sZSI6IkFETUlOIiwiZXhwIjoxNzYwNDgyNTQ0fQ.JXtZMpNk6_fs41372-lWCOn5n0qdu6XIFZoqdCWgXuoh71wMkHPSRxp_eRPsQFvPAcCGWSf5ewQP2BOcs2JITw",
-								"type": "text",
-								"disabled": true
-							}
-						],
+						"header": [],
 						"body": {
 							"mode": "raw",
 							"raw": "{\r\n    \"email\" : \"user_l@domain.com\",\r\n    \"password\" : \"passABC\"\r\n}",
@@ -192,14 +185,14 @@
 						"method": "PUT",
 						"header": [
 							{
-								"key": "X-Auth-Token",
-								"value": "1234",
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}",
 								"type": "text"
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"quantity\" : 200\r\n}",
+							"raw": "{\r\n    \"quantity\" : 2\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -207,21 +200,17 @@
 							}
 						},
 						"url": {
-							"raw": "{{localhost}}/carts/:cart_id/items/:product_id",
+							"raw": "{{baseUrl}}/carts/{{cartId}}/items/:product_id",
 							"host": [
-								"{{localhost}}"
+								"{{baseUrl}}"
 							],
 							"path": [
 								"carts",
-								":cart_id",
+								"{{cartId}}",
 								"items",
 								":product_id"
 							],
 							"variable": [
-								{
-									"key": "cart_id",
-									"value": "fb7d7373-0da0-4d8e-a79d-c6dc513ec149"
-								},
 								{
 									"key": "product_id",
 									"value": "1"
@@ -240,14 +229,14 @@
 						"method": "POST",
 						"header": [
 							{
-								"key": "X-Auth-Token",
-								"value": "1234",
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}",
 								"type": "text"
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"productId\":2\r\n}",
+							"raw": "{\r\n    \"productId\":3\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -274,8 +263,8 @@
 						"method": "DELETE",
 						"header": [
 							{
-								"key": "X-Auth-Token",
-								"value": "1234",
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}",
 								"type": "text"
 							}
 						],
@@ -289,21 +278,17 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/carts/:cart_id/items/:product_id",
+							"raw": "{{baseUrl}}/carts/{{cartId}}/items/:product_id",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"carts",
-								":cart_id",
+								"{{cartId}}",
 								"items",
 								":product_id"
 							],
 							"variable": [
-								{
-									"key": "cart_id",
-									"value": "29853fcf-2ef2-4d24-82d0-275bae59a049"
-								},
 								{
 									"key": "product_id",
 									"value": "1"
@@ -319,8 +304,8 @@
 						"method": "DELETE",
 						"header": [
 							{
-								"key": "X-Auth-Token",
-								"value": "1234",
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}",
 								"type": "text"
 							}
 						],
@@ -334,20 +319,14 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/carts/:cart_id/items",
+							"raw": "{{baseUrl}}/carts/{{cartId}}/items",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"carts",
-								":cart_id",
+								"{{cartId}}",
 								"items"
-							],
-							"variable": [
-								{
-									"key": "cart_id",
-									"value": "29853fcf-2ef2-4d24-82d0-275bae59a049"
-								}
 							]
 						}
 					},
@@ -365,8 +344,8 @@
 						"method": "GET",
 						"header": [
 							{
-								"key": "X-Auth-Token",
-								"value": "1234",
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}",
 								"type": "text"
 							}
 						],
@@ -380,19 +359,13 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/carts/:cart_id",
+							"raw": "{{baseUrl}}/carts/{{cartId}}",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"carts",
-								":cart_id"
-							],
-							"variable": [
-								{
-									"key": "cart_id",
-									"value": "29853fcf-2ef2-4d24-82d0-275bae59a049"
-								}
+								"{{cartId}}"
 							]
 						}
 					},
@@ -509,7 +482,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"cartId\" : \"29853fcf-2ef2-4d24-82d0-275bae59a049\"\r\n}",
+							"raw": "{\r\n    \"cartId\" : \"validCartId\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -578,13 +551,13 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/users/4",
+							"raw": "{{baseUrl}}/users/1",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"users",
-								"4"
+								"1"
 							]
 						}
 					},
