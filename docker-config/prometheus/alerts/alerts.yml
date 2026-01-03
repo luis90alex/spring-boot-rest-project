@@ -1,0 +1,47 @@
+# Prometheus groups by alert groups (evaluated in block)
+# 2 alerts defined here and one test alert
+groups:
+  - name: checkout-alerts
+    rules:
+
+      - alert: CheckoutHighErrorRate
+        expr: |
+          (
+            sum(rate(http_server_requests_seconds_count{
+              uri="/checkout",
+              outcome=~"CLIENT_ERROR|SERVER_ERROR"
+            }[1m]))
+            /
+            sum(rate(http_server_requests_seconds_count{
+              uri="/checkout"
+            }[1m]))
+          ) > 0.05
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High error rate on /checkout"
+          description: "More than 5% of checkout requests are failing"
+
+      - alert: CheckoutHighLatencyP95
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum(rate(http_server_requests_seconds_bucket{
+              uri="/checkout"
+            }[1m])) by (le)
+          ) > 3
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High p95 latency on /checkout"
+          description: "95th percentile latency is above 3 seconds"
+      - alert: TestAlert
+        expr: vector(1)
+        for: 5s
+        labels:
+          severity: info
+        annotations:
+          summary: "This is a test alert"
+          description: "Always firing to test alerting pipeline"

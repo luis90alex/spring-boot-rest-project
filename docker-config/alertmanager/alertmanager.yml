@@ -1,0 +1,18 @@
+global:
+  resolve_timeout: 5m
+
+route:
+  receiver: "email-alerts"
+
+# To send emails SMTP is needed. I've used mailtrap
+# They provide me a sending domain = demomailtrap.com and the needed data like
+# Host, port, username, password... In readme there is more information about it
+receivers:
+  - name: "email-alerts"
+    email_configs:
+      - to: "luis90alex@gmail.com"
+        from: "hello@demomailtrap.co"
+        smarthost: "live.smtp.mailtrap.io:587"
+        auth_username: "api"
+        auth_password: "YOUR_API_TOKEN"
+        require_tls: true
