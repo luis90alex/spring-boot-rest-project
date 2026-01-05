@@ -37,11 +37,11 @@ groups:
         annotations:
           summary: "High p95 latency on /checkout"
           description: "95th percentile latency is above 3 seconds"
-      - alert: TestAlert
-        expr: vector(1)
-        for: 5s
-        labels:
-          severity: info
-        annotations:
-          summary: "This is a test alert"
-          description: "Always firing to test alerting pipeline"
+#      - alert: TestAlert
+#        expr: vector(1)
+#        for: 5s
+#        labels:
+#          severity: info
+#        annotations:
+#          summary: "This is a test alert"
+#          description: "Always firing to test alerting pipeline"

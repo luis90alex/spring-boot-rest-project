@@ -94,6 +94,44 @@ Comparing multiple runs - Reporting results
 
 ------------------------------------------------------------------------
 
+## Load Test Results
+
+The following results were obtained using the `checkout-load-test.js` script with **10 Virtual Users (VUs)**.  
+The test ran in three phases: ramp-up (15s), steady (2m), and ramp-down (15s), simulating realistic checkout traffic.
+
+### Requests per Second (Req/s)
+
+This panel shows the number of checkout requests per second processed by the API during the test.  
+![Requests per second](k6/screenshots/k6_req_per_sec_2026-01-05.png)
+
+**Observation:**
+- Peak throughput reached ~6 requests/sec.
+- Throughput smoothly increased during ramp-up, stayed stable during the steady phase, and decreased during ramp-down.
+
+---
+
+### Latency (p50 / p95)
+
+This panel shows the response times (latency) percentiles for the checkout endpoint:
+
+- **p50** – median latency
+- **p95** – 95th percentile latency
+
+![Latency p50/p95](k6/screenshots/k6_latency_p50_p95_2026-01-05.png)
+
+**Observation:**
+- Median latency (p50) stayed around **~500 ms**.
+- 95th percentile latency (p95) peaked at **~594 ms**, well below the 3-second target threshold (`p(95)<3000ms`).
+
+---
+
+### Notes
+
+- These results were generated with **10 VUs**.
+- Metrics were collected via **Micrometer → Prometheus → Grafana**.
+- Error rate was minimal during the test (`<5%`).
+- For reproducibility, see the script [`checkout-load-test.js`](./checkout-load-test.js) and the environment variable configuration.
+
 ## 🚨 Important Notes
 
 -   This test **creates real orders** in the database.
