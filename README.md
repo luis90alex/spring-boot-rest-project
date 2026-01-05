@@ -15,13 +15,26 @@ This project is designed as a real-world portfolio backend suitable for showcasi
 - Admin endpoint example  
 - Postman collection and environments  
 - Environment-based config (dev/prod)  
-- CI workflow for Maven / Java 21  
+- CI workflow for Maven / GitHub Actions (Testcontainers + build/push to GHCR)
+- **Java 17** (CI) / Spring Boot 3
+
+### Included Technologies & Practices
+- **Spring Data JPA** (repositories + entities + queries)
+- **Flyway** database migrations (idempotent migration scripts)
+- **MapStruct** for DTO ↔ Entity mapping
+- **Actuator** for health, metrics and info endpoints
+- **Prometheus** + **Grafana** integration (monitoring + dashboards)
+- **Alertmanager** for basic alerting rules (configured in docker-config/)
+- **k6** load testing scripts and reports (`k6/`)
+- **Testcontainers** for reliable integration tests in CI
+- Docker / Docker Compose for local and full-stack runs
+
 
 ---
 
 ## 🛠️ Tech Stack
 
-- **Java 21**
+- **Java 17**
 - **Spring Boot 3**
 - **Spring Security + JWT**
 - **MySQL**
@@ -29,19 +42,56 @@ This project is designed as a real-world portfolio backend suitable for showcasi
 - **Maven**
 - **Railway.app Deployment**
 - **Postman (collections + tests)**
+- **Docker / Docker Compose** for containerized setup
+- **Prometheus + Grafana** for monitoring
+- **k6** for load testing
 
 ---
 
 ## 📦 Project Structure
 
 ```
-src/main/java
- ├─ controllers/
- ├─ services/
- ├─ repositories/
- ├─ exceptions/
- ├─ dto/
- └─ security/
+├─ .github/
+│  └─ workflows/
+│     └─ ci.yml (CI: unit, integration, build & push)
+├─ docker-config/
+│  ├─ prometheus/
+│  ├─ grafana/
+│  ├─ alertmanager/
+│  └─ runbooks/
+├─ k6/
+│  ├─ checkout-load-test.js
+│  ├─ README-k6.md
+│  └─ screenshots/
+├─ postman/
+├─ src/
+│  ├─ main/
+│  │  ├─ java/
+│  │  │  └─ com/restlearningjourney/store/
+│  │  │     ├─ admin/
+│  │  │     ├─ auth/
+│  │  │     ├─ carts/
+│  │  │     ├─ orders/
+│  │  │     ├─ payments/
+│  │  │     ├─ products/
+│  │  │     └─ users/
+│  │  └─ resources/
+│  │     ├─ application.yaml
+│  │     ├─ application-dev.yaml
+│  │     ├─ application-prod.yaml
+│  │     └─ db/
+│  │        └─ migration/         # Flyway migrations (V1__..., V2__...)
+│  └─ test/
+│     ├─ java/
+│     │  └─ ... (unit & integration tests, containers helpers)
+│     └─ resources/
+├─ .env.example
+├─ compose.yml
+├─ Dockerfile
+├─ DEMO.md
+├─ pom.xml
+├─ logs/
+└─ README.md
 ```
 
 ---
@@ -56,10 +106,15 @@ see the dedicated guide:
 This includes step-by-step curl commands, sample requests, expected responses, Stripe test flow,
 and troubleshooting tips used for portfolio demos and interviews.
 
+---
 
 ## ▶️ How to Run the Project Locally
 
-### 1. Clone the repository
+You can run the application in **two ways** (both supported): **(A)** development workflow using Java + local MySQL plus monitoring containers, or **(B)** full containerized approach.
+
+> **Tip:** During active development I typically use **Mode A** (Java + local MySQL + monitoring containers). Both options are documented below so reviewers and interviewers can reproduce the demo quickly.
+
+### 0. Clone the repository
 
 ```bash
 git clone https://github.com/luis90alex/spring-boot-rest-project
@@ -68,44 +123,83 @@ cd spring-boot-rest-project
 
 ---
 
-### 2. Create `.env` file
+### 1. Create `.env` file
 
-You have an env.example file
-```env
-JWT_SECRET=your-secret-here
-STRIPE_SECRET_KEY=sk_test_...
-STRIPE_WEBHOOK_SECRET_KEY=whsec_...
+This repo includes an `.env.example` file. Create `.env` by copying and filling the values.
+
+Example `.env.example` (do **not** commit secrets):
+
 ```
+JWT_SECRET=YOUR_JWT_SECRET
+STRIPE_SECRET_KEY=YOUR_STRIPE_SECRET
+STRIPE_WEBHOOK_SECRET_KEY=YOUR_WEBHOOK_SECRET
+MYSQL_ROOT_PASSWORD=ROOT_PASSWORD_ONLY_USED_IN_MYSQL_CONTAINER
+MYSQL_DATABASE=DATABASE_NAME_ONLY_USED_IN_MYSQL_CONTAINER
+MYSQL_USER=USERNAME
+MYSQL_PASSWORD=USER_PASSWORD
+```
+
+**Notes:**
+
+- `MYSQL_ROOT_PASSWORD` and `MYSQL_DATABASE` are **only used** if you run MySQL **inside Docker containers** (mode B). If you run MySQL locally, use your local DB credentials and set `SPRING_DATASOURCE_URL` or the `application-dev.yml` properties accordingly.
+- Keep all real secrets out of the repo and use your CI secrets store for GitHub Actions.
 
 ---
 
-### 3. Start MySQL locally
+### Mode A — Java + local MySQL + monitoring containers (recommended for dev)
+
+1. Ensure a local MySQL is running and create the database (example):
 
 ```bash
 mysql -u root -p
-CREATE DATABASE store;
+CREATE DATABASE store_api;
 ```
 
----
+2. Create `.env` from `.env.example` and set `MYSQL_USER` and `MYSQL_PASSWORD` to your local DB user (or leave defaults and use `application-dev.yml` local url).
 
-### 4. Run with Maven Wrapper
+3. Run the application locally (Maven wrapper):
 
 ```bash
 ./mvnw spring-boot:run
 ```
 
-Server runs at:  
-👉 `http://localhost:8080`
+4. Start monitoring stack (Prometheus, Grafana, Alertmanager) in containers:
+
+```bash
+docker compose up -d
+```
+
+5. Access:
+- App: `http://localhost:8080`
+- Prometheus: `http://localhost:9090`
+- Grafana: `http://localhost:3000` (default admin password: `admin` in the dev compose)
+- Alertmanager: `http://localhost:9093`
+
+---
+
+### Mode B — All in Docker (app + MySQL + Prometheus + Grafana + Alertmanager)
+
+This mode runs everything as containers. Use this to reproduce the full stack exactly as in the demo environment.
+Uncomment all services in dockerfile and after that: 
+1. Build and run:
+
+```bash
+docker compose up --build
+```
+
+2. The compose file will start the Java app image (built from `Dockerfile`), MySQL container (if enabled in `compose.yml`), and monitoring containers. Ports are exposed on the host so you can reach the services at the same URLs noted above.
+
+> Note: if you prefer to run only a subset of the services you can pass the service names to `docker compose up` (for example `docker compose up -d prometheus grafana` to run only the monitoring stack).
 
 ---
 
 ## 🌍 Deployment (Railway)
 
-Production deployment is available here:
+Production deployment is available here (example):
 
 👉 **https://spring-boot-rest-project-production.up.railway.app**
 
-Railway uses these application environment variables:
+Railway uses these application environment variables (example):
 
 ```
 JWT_SECRET
@@ -141,13 +235,12 @@ This repository includes:
 
 ```
 postman/
- ├─ collection.json
+ ├─ store-api.postman_collection.json
  ├─ environment.dev.json
  └─ environment.prod.json
 ```
 
-### Dev environment example
-
+- **Dev environment example**:
 ```json
 {
   "baseUrl": "http://localhost:8080",
@@ -155,8 +248,7 @@ postman/
 }
 ```
 
-### Prod environment example
-
+- **Prod environment example**:
 ```json
 {
   "baseUrl": "https://spring-boot-rest-project-production.up.railway.app",
@@ -164,8 +256,7 @@ postman/
 }
 ```
 
-### Script: Store the accessToken
-
+- Script to store `accessToken` in Postman collection run scripts:
 ```javascript
 var json = pm.response.json();
 pm.collectionVariables.set("accessToken", json.token);
@@ -195,7 +286,7 @@ stripe login
 stripe listen --forward-to http://localhost:8080/checkout/webhook
 ```
 
-You will receive a webhook secret like:
+You will receive a webhook secret (example):
 
 ```
 whsec_123456
@@ -290,16 +381,82 @@ Below is a curated list of the *most important* endpoints.
 
 ---
 
+## 📊 Monitoring & Load Testing
+
+This project exposes useful observability endpoints and includes load testing scripts.
+
+- **Actuator** endpoints are exposed under `/actuator` (config in `application*.yml`)
+- **Prometheus** scrapes the Actuator `/actuator/prometheus` endpoint
+- **Grafana** dashboards are provisioned via `docker-config/grafana/` and connected to Prometheus
+- **Alertmanager** is configured to receive alerts (see `docker-config/alertmanager/alertmanager.yml`)
+- **k6** scripts for load testing are stored in `k6/`:
+  - `k6/checkout-load-test.js`
+  - `k6/README-k6.md`
+  - Results and screenshots: `k6/screenshots/`
+- **Email Notifications**. Uses **SMTP** for email delivery. Mailtrap is recommended for testing 
+(free and easy to set up)
+
+Quick commands:
+
+- Start only monitoring containers (Mode A dev):
+```bash
+docker compose up -d prometheus grafana alertmanager
+```
+
+- View Prometheus: `http://localhost:9090`  
+- View Grafana: `http://localhost:3000` (default admin: `admin`)  
+- View Alertmanager: `http://localhost:9093`
+
+### Alerting
+
+This project includes two production-style Prometheus alerts related to the checkout flow:
+
+- `CheckoutHighErrorRate` — fires when the checkout endpoint has an unusually high error rate (>5%).
+- `CheckoutHighLatencyP95` — fires when the 95th percentile latency for checkout is above the defined threshold.
+-  `TestAlert` - firing testing alarm (commented by default)
+
+Alerts are sent by **Alertmanager** via SMTP using Mailtrap credentials (used for development/testing).
+Example of the section email configuration (docker-config/alertmanager/alertmanager.yml):
+```yaml
+receivers:
+  - name: "email-alerts"
+    email_configs:
+      - to: "your-email@example.com"
+        from: "hello@demomailtrap.co"
+        smarthost: "live.smtp.mailtrap.io:587"
+        auth_username: "api"
+        auth_password: "YOUR_API_TOKEN"
+        require_tls: true
+```
+
+### Runbooks
+Runbooks are included in docker-config/runbooks/
+
+Example: checkout_alerts.md explains the steps to follow when CheckoutHighErrorRate
+or CheckoutHighLatencyP95 alerts fire
+
+---
+
 ## 🧹 Code Quality & CI
 
-Includes GitHub Actions workflow:
+This repo includes a GitHub Actions workflow for CI:
 
-- Uses **JDK 21**
-- Runs `mvn -B verify`
-- Optional: Newman to run Postman tests
+- File: `.github/workflows/ci.yml` (active or disabled file present)
+- Jobs include:
+  - Build & unit tests (JUnit / Maven)
+  - Integration tests using Testcontainers (mysql in container) or
+  an integration test using H2 database
+  - Build & push Docker image to GHCR (if enabled)
+  - Upload test reports artifacts (surefire / failsafe)
 
-File:  
-`.github/workflows/ci.yml`
+**Notes / hints**:
+- The integration job expects `JWT_SECRET` in the runner secrets (configured as `secrets.JWT_SECRET`).
+
+CI snippet highlights:
+
+- Java version in CI: **17** (uses `actions/setup-java@v5`, `distribution: temurin`, `java-version: '17'`)  
+- Image publishing: the workflow logs into `ghcr.io` and pushes tags based on git refs/commit SHA.  
+- Optional: a Trivy scan step is included for image vulnerability scanning (you can enable `fail-on-high` if you want CI to fail on high vulnerabilities).
 
 ---
 
