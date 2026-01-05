@@ -1,8 +1,12 @@
-import http from 'k6/http';
-import { check, sleep } from 'k6';
+import http from 'k6/http'; //import http methods like get,post,put,delete...
+import { check, sleep } from 'k6';// import check and sleep methods to verify and simulate think time
 import { Rate } from 'k6/metrics';
+import exec from 'k6/execution';// import exec to obtain execution data
 
 export let errorRate = new Rate('errors');
+// 3 stages are defined. At the beginning there are 0 VU that increments gradually until reaching the target number.
+// This is the ramp-up stage. After that ,during steady stage they use the app to do the checkout and finally
+// in the ramp-down stage, VU is reducing until arriving to 0 VU.
 
 export let options = {
     stages: [
@@ -16,65 +20,91 @@ export let options = {
     },
 };
 
+// Environment variables can be used or default values
+// Remember to use an already registered user. If the user is not registered, the script won't work
+// All the details in readme-k6.md
 const BASE_URL = __ENV.BASE_URL || 'http://localhost:8080';
 const USER_EMAIL = __ENV.USER_EMAIL || 'user_l@domain.com';
 const USER_PASSWORD = __ENV.USER_PASSWORD || 'passABC';
-const PRODUCT_IDS = (__ENV.PRODUCT_IDS || '3').split(',').map(s => s.trim()).filter(s => s);
+const PRODUCT_IDS = (__ENV.PRODUCT_IDS || '3')
+    .split(',')
+    .map(s => s.trim())
+    .filter(Boolean);
 
-console.log(`BASE_URL ID: ${BASE_URL}`);
-console.log(`USER_EMAIL ID: ${USER_EMAIL}`);
-console.log(`USER_PASSWORD ID: ${USER_PASSWORD}`);
-console.log(`PRODUCT_IDS ID: ${PRODUCT_IDS}`);
+/* ---------------- SETUP ---------------- */
 
 export function setup() {
-    console.log('=== LOGIN ===');
-    let loginRes = http.post(`${BASE_URL}/auth/login`, JSON.stringify({
-        email: USER_EMAIL,
-        password: USER_PASSWORD
-    }), { headers: { 'Content-Type': 'application/json' }});
+    let res = http.post(
+        `${BASE_URL}/auth/login`,
+        JSON.stringify({ email: USER_EMAIL, password: USER_PASSWORD }),
+        { headers: { 'Content-Type': 'application/json' } }
+    );
 
-    check(loginRes, {
-        'login status 200': (r) => r.status === 200,
-        'login returns token': (r) => r.json('token') !== undefined
-    }) || errorRate.add(1);
+    const ok = check(res, {
+        'login status 200': r => r.status === 200,
+        'login returns token': r => r.json('token') !== undefined,
+    });
 
-    const token = loginRes.json('token');
-    console.log(`Login token: ${token.substring(0,20)}...`); // no mostrar todo el token
+    if (!ok) {
+        console.error(`[SETUP] Login failed (status=${res.status})`);
+        errorRate.add(1);
+        return {};
+    }
+
+    const token = res.json('token');
+    console.log(`[SETUP] Login OK, token=${token.substring(0, 20)}...`);
     return { token };
 }
 
-export default function (data) {
-    const authHeaders = { Authorization: `Bearer ${data.token}`, 'Content-Type': 'application/json' };
+/* ---------------- DEFAULT ---------------- */
 
-    console.log('=== CREATE CART ===');
-    let cartRes = http.post(`${BASE_URL}/carts`, null, { headers: authHeaders });
-    const cartOk = check(cartRes, {
-        'cart created': (r) => r.status === 201 && r.json('id') !== undefined
-    });
-    if (!cartOk) { errorRate.add(1); sleep(1); return; }
+export default function (data) {
+    const vu = exec.vu.idInTest;
+    const headers = {
+        Authorization: `Bearer ${data.token}`,
+        'Content-Type': 'application/json',
+    };
+
+    // Create cart
+    let cartRes = http.post(`${BASE_URL}/carts`, null, { headers });
+    if (!check(cartRes, { 'cart created': r => r.status === 201 })) {
+        console.error(`[VU ${vu}] Cart creation failed`);
+        errorRate.add(1);
+        return;
+    }
 
     const cartId = cartRes.json('id');
-    console.log(`Cart ID: ${cartId}`);
 
-    console.log('=== ADD ITEMS ===');
-    const toAdd = PRODUCT_IDS.length > 1 ? PRODUCT_IDS.slice(0, 2) : PRODUCT_IDS;
-    toAdd.forEach(productId => {
-        let itemRes = http.post(`${BASE_URL}/carts/${cartId}/items`, JSON.stringify({ productId: Number(productId) }), { headers: authHeaders });
-        check(itemRes, {
-            'item added': (r) => r.status === 201 || r.status === 200,
-            'item has product': (r) => r.json('product') !== undefined
-        }) || errorRate.add(1);
+    // Add items
+    for (const productId of PRODUCT_IDS) {
+        let itemRes = http.post(
+            `${BASE_URL}/carts/${cartId}/items`,
+            JSON.stringify({ productId: Number(productId) }),
+            { headers }
+        );
 
-        console.log(`Added product ${productId} to cart`);
-        sleep(0.2);
-    });
+        if (!check(itemRes, { 'item added': r => r.status < 300 })) {
+            console.error(
+                `[VU ${vu}] Failed adding product ${productId} to cart ${cartId}`
+            );
+            errorRate.add(1);
+            return;
+        }
+    }
 
-    console.log('=== CHECKOUT ===');
-    let checkoutRes = http.post(`${BASE_URL}/checkout`, JSON.stringify({ cartId }), { headers: authHeaders });
-    check(checkoutRes, {
-        'checkout success': (r) => r.status === 200 && r.json('checkoutUrl') !== undefined
-    }) || errorRate.add(1);
+    // Checkout
+    let checkoutRes = http.post(
+        `${BASE_URL}/checkout`,
+        JSON.stringify({ cartId }),
+        { headers }
+    );
 
-    console.log(`Checkout URL: ${checkoutRes.json('checkoutUrl')}`);
+    if (!check(checkoutRes, { 'checkout success': r => r.status === 200 })) {
+        console.error(`[VU ${vu}] Checkout failed for cart ${cartId}`);
+        errorRate.add(1);
+        return;
+    }
+
+    console.log(`[VU ${vu}] Checkout OK (cart=${cartId})`);
     sleep(1);
 }

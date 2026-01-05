@@ -14,6 +14,7 @@ target/
 # Logs
 logs/
 *.log
+summary.json
 
 # OS files excluded (finder MacOs ,thumbs cache excluded)
 .DS_Store
