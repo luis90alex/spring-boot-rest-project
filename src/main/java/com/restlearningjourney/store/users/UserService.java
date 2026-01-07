@@ -1,5 +1,8 @@
 package com.restlearningjourney.store.users;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -31,6 +34,7 @@ public class UserService {
                 .toList();
     }
 
+    @Cacheable(value = "users", key = "#id") //get or save cache
     public UserDto getUser(Long id){
         var user =  userRepository.findById(id).orElseThrow(UserNotFoundException::new);
         return userMapper.toDto(user);
@@ -48,6 +52,7 @@ public class UserService {
         return userMapper.toDto(user);
     }
 
+    @CachePut(value = "users", key = "#id") //update cache item
     public UserDto updateUser(Long id, UpdateUserRequest request) {
 
         var user = userRepository.findById(id).orElseThrow(UserNotFoundException::new);
@@ -56,11 +61,13 @@ public class UserService {
         return userMapper.toDto(user);
     }
 
+    @CacheEvict(value = "users", key = "#id") //Delete cache item
     public void deleteUser(Long id){
         var user = userRepository.findById(id).orElseThrow(UserNotFoundException::new);
         userRepository.delete(user);
     }
 
+    @CacheEvict(value = "users", key = "#id") //delete cache item to keep consistency
     public void changePassword(Long id,ChangePasswordRequest request){
         var user = userRepository.findById(id).orElseThrow(UserNotFoundException::new);
         if (!user.getPassword().equals(request.getOldPassword())){

@@ -3,10 +3,10 @@ package com.restlearningjourney.store.users;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-
-import java.time.LocalDateTime;
+import lombok.NoArgsConstructor;
 
 @AllArgsConstructor
+@NoArgsConstructor
 @Getter
 public class UserDto {
 

@@ -1,6 +1,6 @@
-# File to define one container with spring boot app + mysql database + grafana + prometheus + alertmanager
+# File to define one container with spring boot app + mysql database + grafana + prometheus + alertmanager + redis
 # To run everything in containers uncomment spring-rest-store and mysql services and the mysql volume
-# If you prefer to run (java app + mysql) locally + observability in containers keep java and mysql services commented
+# If you prefer to run (java app + mysql) locally + everything in containers keep java and mysql services commented
 services:
 #  # Service name used for the spring boot app
 #  spring-rest-store:
@@ -99,8 +99,20 @@ services:
       - ./docker-config/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
     ports:
       - "9093:9093"
-
+  redis:
+    image: redis:8.2-alpine
+    command: redis-server --requirepass password
+    volumes:
+      - redis-data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: [ "CMD", "redis-cli", "-a", "password", "ping" ]
+      interval: 5s
+      timeout: 3s
+      retries: 10
 # List of used volumes
 volumes:
   #mysql-volume:
   grafana-data:
+  redis-data:

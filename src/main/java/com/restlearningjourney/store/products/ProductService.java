@@ -2,6 +2,10 @@ package com.restlearningjourney.store.products;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,6 +25,10 @@ public class ProductService {
         this.categoryRepository = categoryRepository;
     }
 
+    @Cacheable(
+            value = "productsAll",
+            key = "#categoryId != null ? #categoryId : 'ALL'"
+    )
     public List<ProductDto> getAllProducts(Byte categoryId) {
 
         List<Product> products;
@@ -35,6 +43,7 @@ public class ProductService {
                 .toList();
     }
 
+    @Cacheable(value = "products", key = "#id")
     public ProductDto getProductById(Long id) {
         var product = productRepository.findById(id).orElse(null);
         if (product == null){
@@ -43,6 +52,7 @@ public class ProductService {
         return productMapper.toDto(product);
     }
 
+    @CacheEvict(value = "productsAll", allEntries = true)
     public ProductDto createProduct(ProductDto productDto) {
         logger.info("createProduct - productDto = {}" , productDto);
 
@@ -59,6 +69,9 @@ public class ProductService {
         return productDto;
     }
 
+    // Update product — update individual cache and evict list cache
+    @CachePut(value = "products", key = "#id")
+    @CacheEvict(value = "productsAll", allEntries = true)
     public ProductDto updateProduct(Long id, ProductDto productDto) {
 
         logger.info("updateProduct - id = {}" , id);
@@ -79,6 +92,11 @@ public class ProductService {
         return productDto;
     }
 
+    // Delete product — evict individual and list cache
+    @Caching(evict = {
+            @CacheEvict(value = "products", key = "#id"),          // only this product
+            @CacheEvict(value = "productsAll", allEntries = true)  // the whole list
+    })
     public void deleteProduct(Long id) {
         logger.info("deleteProduct - id = {}" , id);
         var product = productRepository.findById(id).orElse(null);

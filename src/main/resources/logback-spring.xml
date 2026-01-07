@@ -2,10 +2,12 @@
 
     <springProperty name="LOG_PATH" source="logging.file.path"/>
 
-    <!-- Console appender with JSON -->
+    <!-- Friendly console logs -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
-            <timeZone>UTC</timeZone>
+        <encoder>
+            <pattern>
+                %d{HH:mm:ss.SSS} [%thread] %highlight(%-5level) %cyan(%logger{36}) - %msg%n
+            </pattern>
         </encoder>
     </appender>
 
