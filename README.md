@@ -17,6 +17,9 @@ This project is designed as a real-world portfolio backend suitable for showcasi
 - Environment-based config (dev/prod)  
 - CI workflow for Maven / GitHub Actions (Testcontainers + build/push to GHCR)
 - **Java 17** (CI) / Spring Boot 3
+- Redis caching for frequently accessed data (products, carts, sessions)
+- Structured logging with Logback (JSON format) + console logs for easy monitoring
+
 
 ### Included Technologies & Practices
 - **Spring Data JPA** (repositories + entities + queries)
@@ -45,7 +48,8 @@ This project is designed as a real-world portfolio backend suitable for showcasi
 - **Docker / Docker Compose** for containerized setup
 - **Prometheus + Grafana** for monitoring
 - **k6** for load testing
-
+- **Redis** (caching layer)
+- **Logback** (structured logs in JSON + console output)
 ---
 
 ## 📦 Project Structure
@@ -177,7 +181,7 @@ docker compose up -d
 
 ---
 
-### Mode B — All in Docker (app + MySQL + Prometheus + Grafana + Alertmanager)
+### Mode B — All in Docker (app + MySQL + Prometheus + Grafana + Alertmanager + Redis)
 
 This mode runs everything as containers. Use this to reproduce the full stack exactly as in the demo environment.
 Uncomment all services in dockerfile and after that: 
