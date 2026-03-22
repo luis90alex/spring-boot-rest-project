@@ -39,4 +39,4 @@ app:
     bootstrap-servers: localhost:9092
     group-id: spring-service-group
     topics:
-      user: user.events
+      order: order.events

@@ -10,17 +10,17 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/producer")
-public class StringEventProducerController {
+public class OrderEventProducerController {
 
-    private final KakfaProducerService kakfaProducerService;
+    private final KafkaProducerService kafkaProducerService;
 
-    public StringEventProducerController(KakfaProducerService kakfaProducerService) {
-        this.kakfaProducerService = kakfaProducerService;
+    public OrderEventProducerController(KafkaProducerService kafkaProducerService) {
+        this.kafkaProducerService = kafkaProducerService;
     }
 
     @PostMapping
     public ResponseEntity<?> sendMessage(@RequestBody OrderCreatedEvent event) {
-        kakfaProducerService.sendOrderEvent(event);
+        kafkaProducerService.sendOrderEvent(event);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }

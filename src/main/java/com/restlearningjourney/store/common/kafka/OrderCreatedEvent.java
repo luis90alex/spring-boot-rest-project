@@ -3,6 +3,7 @@ package com.restlearningjourney.store.common.kafka;
 import java.math.BigDecimal;
 
 public record OrderCreatedEvent(
-   String orderId,
-   BigDecimal amount
+        String eventId,
+        String orderId,
+        BigDecimal amount
 ) {}

@@ -1,6 +1,8 @@
 package com.restlearningjourney.store.payments;
 
 import com.restlearningjourney.store.carts.Cart;
+import com.restlearningjourney.store.common.kafka.KafkaProducerService;
+import com.restlearningjourney.store.common.kafka.OrderCreatedEvent;
 import com.restlearningjourney.store.orders.Order;
 import com.restlearningjourney.store.carts.CartEmptyException;
 import com.restlearningjourney.store.carts.CartNotFoundException;
@@ -15,6 +17,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.UUID;
+
 @Service
 public class CheckoutService {
 
@@ -23,18 +27,20 @@ public class CheckoutService {
     private final CartService cartService;
     private final AuthService authService;
     private final PaymentGateway paymentGateway;
+    private final KafkaProducerService kafkaProducerService;
     // Timer to create our own metrics using Micrometer
     private final Timer checkoutProcessingTimer;
 
     private static final Logger logger = LoggerFactory.getLogger(CheckoutService.class);
 
 
-    public CheckoutService(CartRepository cartRepository, CartService cartService, AuthService authService, OrderRepository orderRepository, PaymentGateway paymentGateway, MeterRegistry meterRegistry) {
+    public CheckoutService(CartRepository cartRepository, CartService cartService, AuthService authService, OrderRepository orderRepository, PaymentGateway paymentGateway, KafkaProducerService kafkaProducerService, MeterRegistry meterRegistry) {
         this.cartRepository = cartRepository;
         this.orderRepository = orderRepository;
         this.cartService = cartService;
         this.authService = authService;
         this.paymentGateway = paymentGateway;
+        this.kafkaProducerService = kafkaProducerService;
         // metric checkout.processing.time is defined with percentiles and histogram
         this.checkoutProcessingTimer = Timer.builder("checkout.processing.time")
                 .description("Time spent processing checkout requests")
@@ -65,6 +71,15 @@ public class CheckoutService {
                 checkoutResponse.setCheckoutUrl(session.getCheckoutUrl());
 
                 cartService.clearCart(cart.getId());
+
+                // Event is sent after order is created. Possible DB inconsistency
+                // if the event is sent but the db does a rollback. Possible refactor
+                OrderCreatedEvent event = new OrderCreatedEvent(
+                        UUID.randomUUID().toString(),
+                        order.getId().toString(),
+                        order.getTotalPrice()
+                );
+                kafkaProducerService.sendOrderEvent(event);
 
                 return checkoutResponse;
             }catch (PaymentException ex){
