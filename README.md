@@ -18,6 +18,7 @@ This project is designed as a real-world portfolio backend suitable for showcasi
 - CI workflow for Maven / GitHub Actions (Testcontainers + build/push to GHCR)
 - **Java 17** (CI) / Spring Boot 3
 - Redis caching for frequently accessed data (products, carts, sessions)
+- Event-driven architecture with **Kafka** (retries, DLQ, idempotent consumers)
 - Structured logging with Logback (JSON format) + console logs for easy monitoring
 
 
@@ -30,6 +31,7 @@ This project is designed as a real-world portfolio backend suitable for showcasi
 - **Alertmanager** for basic alerting rules (configured in docker-config/)
 - **k6** load testing scripts and reports (`k6/`)
 - **Testcontainers** for reliable integration tests in CI
+- **Apache Kafka** + **Spring Kafka** for event streaming
 - Docker / Docker Compose for local and full-stack runs
 
 
@@ -42,6 +44,8 @@ This project is designed as a real-world portfolio backend suitable for showcasi
 - **Spring Security + JWT**
 - **MySQL**
 - **Stripe API + Webhooks**
+- **Apache Kafka**
+- **Spring Kafka**
 - **Maven**
 - **Railway.app Deployment**
 - **Postman (collections + tests)**
@@ -50,6 +54,37 @@ This project is designed as a real-world portfolio backend suitable for showcasi
 - **k6** for load testing
 - **Redis** (caching layer)
 - **Logback** (structured logs in JSON + console output)
+
+---
+
+## 📬 Event-Driven Architecture & Kafka
+
+This project includes an event-driven flow built with **Apache Kafka** to decouple business operations and improve reliability.
+
+Additionally, two Kafka testing endpoints were added:
+
+- **orderEvent** – creates a new order event.
+- **DLQ reprocessing** – reprocesses events from the Dead Letter Queue (idempotent).
+
+Both endpoints are included in the Postman collection under the `Kafka` folder.
+### Why Kafka
+- High throughput for asynchronous processing
+- Loose coupling between producers and consumers
+- Partitioning for scalable event processing
+- Replay capability for debugging and recovery
+- Better fit for domain events than synchronous calls
+
+### Design decisions
+- **orderId as Kafka key** → preserves ordering per order
+- **eventId** → idempotency key to prevent duplicate processing
+- **@RetryableTopic** → automatic retry handling for transient failures
+- **DLQ / DLT** → dead-letter handling for unrecoverable errors
+- **processed_events table** → guarantees idempotent consumption
+
+### Reliability strategy
+Kafka can deliver messages more than once, so consumers are designed to be idempotent.  
+The consumer checks whether an `eventId` has already been processed before applying business logic.
+
 ---
 
 ## 📦 Project Structure
@@ -78,6 +113,8 @@ This project is designed as a real-world portfolio backend suitable for showcasi
 │  │  │     ├─ orders/
 │  │  │     ├─ payments/
 │  │  │     ├─ products/
+│  │  │     ├─ common/
+│  │  │         └─ kafka
 │  │  │     └─ users/
 │  │  └─ resources/
 │  │     ├─ application.yaml
@@ -181,9 +218,9 @@ docker compose up -d
 
 ---
 
-### Mode B — All in Docker (app + MySQL + Prometheus + Grafana + Alertmanager + Redis)
+### Mode B — All in Docker (app + MySQL + Prometheus + Grafana + Alertmanager + Redis + Kafka + Kafdrop)
 
-This mode runs everything as containers. Use this to reproduce the full stack exactly as in the demo environment.
+This mode runs everything as containers. Use this to reproduce the full stack exactly as in the demo environment.  
 Uncomment all services in dockerfile and after that: 
 1. Build and run:
 
@@ -417,9 +454,9 @@ This project includes two production-style Prometheus alerts related to the chec
 
 - `CheckoutHighErrorRate` — fires when the checkout endpoint has an unusually high error rate (>5%).
 - `CheckoutHighLatencyP95` — fires when the 95th percentile latency for checkout is above the defined threshold.
--  `TestAlert` - firing testing alarm (commented by default)
+- `TestAlert` - firing testing alarm (commented by default)
 
-Alerts are sent by **Alertmanager** via SMTP using Mailtrap credentials (used for development/testing).
+Alerts are sent by **Alertmanager** via SMTP using Mailtrap credentials (used for development/testing).  
 Example of the section email configuration (docker-config/alertmanager/alertmanager.yml):
 ```yaml
 receivers:
